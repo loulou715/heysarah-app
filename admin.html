@@ -64,7 +64,7 @@
 </head>
 <body>
 <div class="sidebar">
-  <div class="sidebar-logo">HEYSARAH <span>ADMIN v4.2</span></div>
+  <div class="sidebar-logo">HEYSARAH <span>ADMIN v4.3</span></div>
   <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="icon">📊</span>總覽</div>
   <div class="nav-item" onclick="showPage('orders',this)"><span class="icon">📋</span>訂單管理</div>
   <div class="nav-item" onclick="showPage('import',this)"><span class="icon">📥</span>批次匯入</div>
@@ -205,8 +205,8 @@ const API="https://script.google.com/macros/s/AKfycbyO0fJgsNKj7_xHwkaAfQjjuJQ6wo
 let allOrders=[],productCache={},summaryOrders=[];
 
 async function gasCall(action,params={}){
-  const qs=Object.entries({action,...params}).map(([k,v])=>k+"="+encodeURIComponent(v)).join("&");
-  const res=await fetch(API+"?"+qs);
+  const body=new URLSearchParams({action,...params});
+  const res=await fetch(API,{method:'POST',body});
   return res.json();
 }
 
@@ -223,7 +223,6 @@ function showPage(name,el){
   if(name==="products")loadProducts();
 }
 
-// ── 勾選刪除工具 ──
 function toggleAll(cls,masterCb){
   document.querySelectorAll("."+cls).forEach(cb=>{cb.checked=masterCb.checked;cb.closest("tr").classList.toggle("selected",masterCb.checked);});
   updateDelBtn();
@@ -276,7 +275,6 @@ async function deleteSelectedSummaryOrders(){
   if(r.success){loadSummary(currentSummaryFilter);}else{alert("刪除失敗："+r.message);}
 }
 
-// ── normalize ──
 function normalize(t){
   return t.replace(/[Ａ-Ｚ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
     .replace(/[ａ-ｚ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
@@ -284,7 +282,6 @@ function normalize(t){
     .replace(/＋/g,"+").replace(/　/g," ");
 }
 
-// ── 偵測商品 ──
 function parseProductsFromText(text){
   const lines=normalize(text).split("\n");
   const found=[],seen={};
@@ -312,7 +309,6 @@ function parseProductsFromText(text){
   return found;
 }
 
-// ── 解析訂單 ──
 function parseOrdersFromText(text,defaultNick){
   const lines=normalize(text).split("\n");const orders=[];
   const lineRe=/^\d{1,2}:\d{2}(?::\d{2})?\s+(\S+)\s+(.*)/;
@@ -333,7 +329,6 @@ function parseOrdersFromText(text,defaultNick){
   return orders;
 }
 
-// ── 批次匯入預覽 ──
 function previewImport(){
   const text=document.getElementById("importText").value;
   const detectEl=document.getElementById("detect-products");const previewCard=document.getElementById("preview-card");
@@ -347,7 +342,6 @@ function previewImport(){
   else{previewCard.style.display="none";}
 }
 
-// ── 執行匯入 ──
 async function doImport(){
   const text=document.getElementById("importText").value.trim();
   const nickname=document.getElementById("importNickname").value.trim();
@@ -362,7 +356,6 @@ async function doImport(){
   catch(e){el.textContent="❌ 網路錯誤："+e.message;}
 }
 
-// ── 總覽 ──
 async function loadDashboard(){
   const data=await gasCall("allOrders",{status:"all"});if(!data.success)return;
   const orders=data.orders;
@@ -372,7 +365,6 @@ async function loadDashboard(){
   document.getElementById("tb-recent").innerHTML=orders.slice(0,8).map(o=>`<tr><td style="color:#999;font-size:.78rem">${(o.timestamp||"").substring(5,16)}</td><td>${o.nickname}</td><td>[${o.productCode}] ${o.productName||""}</td><td>${o.qty}</td><td class="price-gold">NT$${(o.subtotal||0).toLocaleString()}</td><td><span class="badge badge-${o.status}">${o.status}</span></td></tr>`).join("");
 }
 
-// ── 訂單管理 ──
 async function loadOrders(status){
   const data=await gasCall("allOrders",{status});if(!data.success)return;
   allOrders=data.orders;renderOrders(allOrders);
@@ -409,7 +401,6 @@ async function deleteSingleOrder(orderId,btn){
   if(r.success){btn.closest("tr").remove();}else{alert("刪除失敗："+r.message);btn.disabled=false;}
 }
 
-// ── 付款管理 ──
 async function loadPayment(){
   const data=await gasCall("allOrders",{status:"all"});if(!data.success)return;
   const pending=data.orders.filter(o=>o.status==="待確認");
@@ -445,7 +436,6 @@ async function deleteSinglePayment(orderId,btn){
   if(r.success){btn.closest("tr").remove();}else{alert("刪除失敗："+r.message);btn.disabled=false;}
 }
 
-// ── 叫貨彙整 ──
 let currentSummaryFilter="all";
 async function loadSummary(filter,el){
   currentSummaryFilter=filter||"all";
@@ -477,7 +467,6 @@ async function loadSummary(filter,el){
   updateDelBtn();
 }
 
-// ── 商品目錄 ──
 async function loadProducts(){
   const data=await gasCall("getProductsAdmin");
   const tbody=document.getElementById("tb-products");
@@ -515,7 +504,6 @@ async function doDeleteProduct(code,btn){
   if(data.success){btn.closest("tr").remove();}else{alert("刪除失敗："+data.message);btn.disabled=false;}
 }
 
-// ── 初始化 ──
 (async function init(){
   try{const pd=await gasCall("getProductsAdmin");if(pd.success&&pd.products)pd.products.forEach(p=>{productCache[p.code]=p;});}catch(e){}
   loadDashboard();
