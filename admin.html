@@ -1,470 +1,268 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>HEYSARAH 管理後台</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet"/>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans TC',sans-serif;background:#FAF8F5;color:#1A1713;min-height:100vh}
-::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:#F3F0EB}::-webkit-scrollbar-thumb{background:#C8BFB3;border-radius:2px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.sp{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle}
-.sp-k{border-color:#E8E2D9;border-top-color:#1A1713}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.fu{animation:fadeUp .3s ease both}
-.card{background:#fff;border:1px solid #E8E2D9;border-radius:16px}
-.inp{background:#F3F0EB;border:1px solid #E8E2D9;border-radius:8px;padding:12px 14px;font-family:'Noto Sans TC',sans-serif;font-size:13px;color:#1A1713;width:100%;transition:border-color .2s}
-.inp:focus{outline:none;border-color:#1A1713}
-.inp::placeholder{color:#C8BFB3}
-textarea.inp{resize:vertical;line-height:1.7}
-.btn{background:#1A1713;color:#FAF8F5;font-family:'Noto Sans TC',sans-serif;font-size:12px;letter-spacing:.1em;padding:11px 20px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;transition:background .2s}
-.btn:hover:not(:disabled){background:#2E2A26}
-.btn:disabled{background:#C8BFB3;cursor:not-allowed}
-.btn-g{background:#1A6B40;color:#fff;font-family:'Noto Sans TC',sans-serif;font-size:12px;padding:11px 20px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:background .2s}
-.btn-g:hover:not(:disabled){background:#155734}
-.btn-g:disabled{background:#A8E6C3;cursor:not-allowed;color:#fff}
-.btn-ol{background:transparent;color:#1A1713;border:1px solid #E8E2D9;font-family:'Noto Sans TC',sans-serif;font-size:12px;padding:9px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
-.btn-ol:hover{border-color:#C8BFB3;background:#F3F0EB}
-.tab{font-family:'Noto Sans TC',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:14px 16px;border:none;background:none;cursor:pointer;color:#8C8279;border-bottom:2px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s}
-.tab.on{color:#1A1713;border-bottom-color:#1A1713}
-.pill{font-family:'Noto Sans TC',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;border:1px solid #E8E2D9;background:#fff;color:#8C8279;cursor:pointer;transition:all .15s}
-.pill:hover{border-color:#C8BFB3;color:#1A1713}
-.pill.on{border-color:#1A1713;background:#1A1713;color:#fff}
-.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 10px;border-radius:20px;flex-shrink:0}
-.cp{background:#FEF9EC;color:#92661A;border:1px solid #F5E0A0}
-.ca{background:#EDFBF3;color:#1A6B40;border:1px solid #A8E6C3}
-.cs{background:#EEF4FD;color:#1A3E7A;border:1px solid #A8C4F0}
-.cx{background:#FDF0EE;color:#8C2A1A;border:1px solid #F0C0B8}
-.hr-deco{border:none;height:1px;background:linear-gradient(90deg,transparent,#E8E2D9,transparent);margin:12px 0}
-.st{font-family:'Noto Sans TC',sans-serif;font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid #E8E2D9;background:#fff;color:#8C8279;cursor:pointer;transition:all .15s}
-.st:hover{border-color:#C8BFB3;background:#F3F0EB;color:#1A1713}
-.st.on{border-color:#1A1713;background:#1A1713;color:#fff}
-.tbl{width:100%;border-collapse:collapse}
-.tbl th{text-align:left;font-family:'Noto Sans TC',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#8C8279;font-weight:400;padding:10px 12px;border-bottom:1px solid #E8E2D9}
-.tbl td{padding:9px 12px;border-bottom:1px solid #F3F0EB;font-family:'Noto Sans TC',sans-serif;font-size:13px;vertical-align:middle}
-.tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:#FAFAF8}
-.sbox{background:#F3F0EB;border-radius:12px;padding:16px;text-align:center}
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:100;pointer-events:none;transition:opacity .3s;opacity:0}
-.sdot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0}
-.order-cb{width:18px;height:18px;accent-color:#C0392B;cursor:pointer;flex-shrink:0;margin-top:3px}
-.btn-red{background:#C0392B;color:#fff;font-family:'Noto Sans TC',sans-serif;font-size:12px;padding:9px 18px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-.btn-red:disabled{background:#F0A0A0;cursor:not-allowed}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HEYSARAH 後台管理</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    body{background:#f5f0eb;font-family:'Noto Sans TC',sans-serif;min-height:100vh;padding-bottom:60px}
+
+    /* Header */
+    .header{background:#1a1a1a;color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+    .header-title{font-size:.9rem;letter-spacing:4px}
+    .header-sub{font-size:.65rem;color:#888;letter-spacing:2px}
+
+    /* Tabs */
+    .tabs{background:#fff;display:flex;border-bottom:1px solid #eee}
+    .tab{
+      flex:1;text-align:center;padding:14px 8px;font-size:.78rem;color:#999;
+      cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;
+    }
+    .tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:500}
+
+    /* Content */
+    .content{max-width:760px;margin:0 auto;padding:24px 16px}
+
+    /* Cards */
+    .card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px}
+    .card-title{font-size:.82rem;font-weight:500;color:#333;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+
+    /* Steps */
+    .steps{display:flex;align-items:center;margin-bottom:24px}
+    .step{
+      width:32px;height:32px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.78rem;font-weight:500;
+      background:#eee;color:#999;flex-shrink:0;
+    }
+    .step.active{background:#1a1a1a;color:#fff}
+    .step.done{background:#a8d5a2;color:#fff}
+    .step-line{flex:1;height:1px;background:#eee}
+
+    /* Textarea */
+    .chat-area{
+      width:100%;border:1.5px solid #e8e2d9;border-radius:12px;
+      padding:14px;font-size:.84rem;font-family:inherit;
+      background:#faf8f5;resize:vertical;min-height:200px;
+      outline:none;line-height:1.8;transition:border-color .2s;
+    }
+    .chat-area:focus{border-color:#b8975a}
+    .chat-area::placeholder{color:#ccc}
+
+    /* Hint chips */
+    .hints{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+    .hint-chip{
+      font-size:.68rem;color:#888;background:#f5f5f5;
+      border-radius:100px;padding:4px 10px;
+    }
+
+    /* Count bar */
+    .count-bar{
+      display:none;margin-top:10px;
+      font-size:.78rem;color:#1a6b40;font-weight:500;
+    }
+
+    /* Buttons */
+    .btn{
+      border:none;border-radius:10px;padding:12px 20px;
+      font-size:.82rem;font-family:inherit;font-weight:500;cursor:pointer;transition:all .2s;
+    }
+    .btn-primary{background:#1a1a1a;color:#fff}
+    .btn-primary:hover{opacity:.8}
+    .btn-primary:disabled{background:#ccc;cursor:default}
+    .btn-ghost{background:#f5f5f5;color:#666}
+    .btn-ghost:hover{background:#eee}
+    .btn-danger{background:#fee2e2;color:#991b1b}
+    .btn-success{background:#d1fae5;color:#065f46}
+
+    /* Table */
+    .tbl{width:100%;border-collapse:collapse;font-size:.78rem}
+    .tbl th{text-align:left;padding:8px 10px;color:#aaa;font-weight:400;border-bottom:1px solid #f0f0f0}
+    .tbl td{padding:10px;border-bottom:1px solid #f8f8f8;vertical-align:middle}
+    .tbl tr:last-child td{border-bottom:none}
+
+    /* Status badges */
+    .badge{font-size:.68rem;padding:3px 10px;border-radius:100px;font-weight:500;display:inline-block}
+    .s-待確認{background:#fff3cd;color:#856404}
+    .s-已付款{background:#d1e7dd;color:#0a3622}
+    .s-已出貨{background:#cfe2ff;color:#084298}
+    .s-取消{background:#f8d7da;color:#842029}
+
+    /* Filter buttons */
+    .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+    .filter-btn{
+      border:1.5px solid #e0e0e0;border-radius:100px;
+      padding:6px 14px;font-size:.74rem;font-family:inherit;
+      background:#fff;color:#666;cursor:pointer;transition:all .2s;
+    }
+    .filter-btn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+
+    /* Toast */
+    .toast{
+      position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+      background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:100px;
+      font-size:.8rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;
+    }
+    .toast.show{opacity:1}
+
+    /* Import review table */
+    .import-table{width:100%;border-collapse:collapse;font-size:.76rem}
+    .import-table th{background:#f8f8f8;padding:8px 10px;text-align:left;color:#666;font-weight:500}
+    .import-table td{padding:9px 10px;border-bottom:1px solid #f0f0f0}
+    .import-table tr:last-child td{border-bottom:none}
+    .import-table input{
+      border:1px solid #e8e8e8;border-radius:6px;padding:4px 8px;
+      font-size:.74rem;font-family:inherit;width:100%;outline:none;
+    }
+    .import-table input:focus{border-color:#b8975a}
+
+    /* Row action */
+    .row-del{background:none;border:none;color:#ddd;cursor:pointer;font-size:1rem;padding:2px 6px;transition:color .2s}
+    .row-del:hover{color:#e53e3e}
+
+    /* Empty state */
+    .empty{text-align:center;color:#bbb;padding:40px 20px;font-size:.82rem}
+
+    /* Step 3 success */
+    .success-box{text-align:center;padding:32px 20px}
+    .success-box .icon{font-size:3rem;margin-bottom:12px}
+    .success-box .msg{font-size:.9rem;color:#333;margin-bottom:6px}
+    .success-box .sub{font-size:.76rem;color:#aaa}
+  </style>
 </head>
 <body>
 
-<header style='background:#fff;border-bottom:1px solid #E8E2D9;position:sticky;top:0;z-index:20;padding:0 24px;'>
-  <div style='max-width:900px;margin:0 auto;height:56px;display:flex;align-items:center;justify-content:space-between;'>
-    <div style='display:flex;align-items:center;gap:14px;'>
-      <span style='font-family:Cormorant Garamond,serif;font-size:22px;font-style:italic;color:#1A1713;font-weight:400;'>HEYSARAH</span>
-      <div style='width:1px;height:20px;background:#E8E2D9;'></div>
-      <span style='font-family:Noto Sans TC,sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#8C8279;'>管理後台</span>
-    </div>
-    <button onclick='window.open("/","_blank")' class='btn-ol' style='font-size:11px;'>→ 顧客查詢頁</button>
-  </div>
-</header>
-
-<div style='background:#fff;border-bottom:1px solid #E8E2D9;overflow-x:auto;'>
-  <div style='max-width:900px;margin:0 auto;padding:0 24px;display:flex;'>
-    <button class='tab on' id='t-import' onclick='switchTab("import")'>📥 批次匯入</button>
-    <button class='tab' id='t-payment' onclick='switchTab("payment")'>💳 付款管理</button>
-    <button class='tab' id='t-supplier' onclick='switchTab("supplier")'>📦 檔口下單</button>
+<div class="header">
+  <div>
+    <div class="header-title">HEYSARAH</div>
+    <div class="header-sub">後台管理系統</div>
   </div>
 </div>
 
-<main style='max-width:900px;margin:0 auto;padding:28px 24px 80px;'>
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('import')">📥 批次匯入</div>
+  <div class="tab" onclick="switchTab('payment')">💳 付款管理</div>
+  <div class="tab" onclick="switchTab('stall')">🏪 檔口下單</div>
+</div>
 
-<!-- TAB 1 -->
-<div id='p-import'>
-  <div style='display:flex;align-items:center;margin-bottom:24px;gap:6px;'>
-    <div class='sdot' id='sd1' style='background:#1A1713;color:#fff;'>1</div>
-    <div style='flex:1;height:1px;background:#E8E2D9;'></div>
-    <div class='sdot' id='sd2' style='background:#F3F0EB;color:#C8BFB3;border:1px solid #E8E2D9;'>2</div>
-    <div style='flex:1;height:1px;background:#E8E2D9;'></div>
-    <div class='sdot' id='sd3' style='background:#F3F0EB;color:#C8BFB3;border:1px solid #E8E2D9;'>3</div>
+<!-- ══════════════════════════════ 批次匯入 ══════════════════════════════ -->
+<div id="tab-import" class="content">
+
+  <!-- Steps indicator -->
+  <div class="steps">
+    <div class="step active" id="s1">1</div>
+    <div class="step-line"></div>
+    <div class="step" id="s2">2</div>
+    <div class="step-line"></div>
+    <div class="step" id="s3">3</div>
   </div>
 
-  <div id='pane-paste'>
-    <div class='card' style='padding:24px;'>
-      <div style='display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;'>
-        <div>
-          <h2 style='font-family:Cormorant Garamond,serif;font-size:22px;font-style:italic;font-weight:400;margin-bottom:4px;'>貼上社群留言</h2>
-          <p style='font-size:12px;color:#8C8279;'>把 LINE 社群訊息全選複製貼在這裡，系統自動辨識下單內容（支援時間戳記格式）</p>
-        </div>
-        <button onclick='doClear()' class='btn-ol' style='flex-shrink:0;margin-left:16px;'>清除</button>
+  <!-- Step 1 -->
+  <div id="step1">
+    <div class="card">
+      <div class="card-title">
+        <span>貼上社群留言</span>
+        <button class="btn btn-ghost" style="padding:6px 12px;font-size:.74rem" onclick="clearChat()">清除</button>
       </div>
-      <textarea id='txt' class='inp' rows='11' oninput='onInput()'
-        placeholder='支援格式：&#10;20:41 小v E25 米杏 L+1&#10;20:55 natalie E25 米杏XL+1&#10;E30 藍XL+1&#10;21:00 ChenChen E20灰1&#10;&#10;（系統自動略過閒聊訊息）'></textarea>
-      <div style='display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;'>
-        <span style='font-size:10px;color:#8C8279;border:1px solid #E8E2D9;border-radius:20px;padding:3px 10px;'>✓ 時間戳記格式</span>
-        <span style='font-size:10px;color:#8C8279;border:1px solid #E8E2D9;border-radius:20px;padding:3px 10px;'>✓ 暱稱獨立一行</span>
-        <span style='font-size:10px;color:#8C8279;border:1px solid #E8E2D9;border-radius:20px;padding:3px 10px;'>✓ E20灰1（無加號）</span>
-        <span style='font-size:10px;color:#8C8279;border:1px solid #E8E2D9;border-radius:20px;padding:3px 10px;'>✓ E16 黑+2</span>
+      <p style="font-size:.76rem;color:#aaa;margin-bottom:12px">把 LINE 社群訊息全選複製貼在這裡，系統自動辨識下單內容（支援時間戳記格式）</p>
+      <textarea id="chatInput" class="chat-area" placeholder="在此貼上 LINE 社群訊息..." oninput="onChatInput()"></textarea>
+      <div class="hints">
+        <span class="hint-chip">✓ 時間戳記格式</span>
+        <span class="hint-chip">✓ 暱稱獨立一行</span>
+        <span class="hint-chip">✓ E20灰1（無加號）</span>
+        <span class="hint-chip">✓ E16 黑+2</span>
       </div>
-      <div style='display:flex;align-items:center;justify-content:space-between;margin-top:18px;'>
-        <p id='det' style='font-size:13px;min-height:20px;font-family:Noto Sans TC,sans-serif;'></p>
-        <button id='parse-btn' onclick='doParse()' disabled class='btn'>
-          <span id='pl'>解析訂單</span>
-          <span id='ps' class='sp' style='display:none;'></span>
-        </button>
+      <div id="countBar" class="count-bar"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:16px">
+        <button id="parseBtn" class="btn btn-primary" disabled onclick="doParseStep()">解析訂單</button>
       </div>
     </div>
   </div>
 
-  <div id='pane-preview' style='display:none;' class='fu'>
-    <div class='card' style='padding:24px;'>
-      <div style='display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;'>
-        <div>
-          <h2 style='font-family:Cormorant Garamond,serif;font-size:22px;font-style:italic;font-weight:400;margin-bottom:4px;'>確認解析結果</h2>
-          <p id='psub' style='font-size:12px;color:#8C8279;'></p>
-        </div>
-        <button onclick='doBack()' class='btn-ol' style='flex-shrink:0;margin-left:16px;'>← 重新貼上</button>
+  <!-- Step 2 -->
+  <div id="step2" style="display:none">
+    <div class="card">
+      <div class="card-title">
+        <span>確認解析結果</span>
+        <span id="parseCount" style="font-size:.74rem;color:#aaa"></span>
       </div>
-      <div style='background:#F3F0EB;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:11px;color:#8C8279;'>
-        💡 暱稱欄可直接點擊編輯，確認正確後再匯入
-      </div>
-      <div style='overflow-x:auto;border:1px solid #E8E2D9;border-radius:10px;'>
-        <table class='tbl'>
-          <thead><tr>
-            <th>暱稱</th><th>商品碼</th><th>規格</th><th style='text-align:center;'>數量</th><th></th>
-          </tr></thead>
-          <tbody id='pbody'></tbody>
+      <p style="font-size:.76rem;color:#aaa;margin-bottom:14px">請確認以下訂單資料，可直接在表格內修改</p>
+      <div style="overflow-x:auto">
+        <table class="import-table">
+          <thead>
+            <tr>
+              <th>暱稱</th><th>商品代號</th><th>規格</th><th>數量</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="previewBody"></tbody>
         </table>
       </div>
-      <div style='display:flex;align-items:center;justify-content:space-between;margin-top:16px;'>
-        <p id='pstat' style='font-size:12px;color:#8C8279;'></p>
-        <button id='imp-btn' onclick='doImport()' class='btn-g'>
-          <span id='il'>確認匯入</span>
-          <span id='is' class='sp' style='display:none;'></span>
-        </button>
+      <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="backToStep1()">← 重新貼上</button>
+        <button class="btn btn-primary" onclick="doImport()">匯入 Google Sheets</button>
       </div>
     </div>
   </div>
 
-  <div id='pane-success' style='display:none;' class='fu'>
-    <div class='card' style='padding:48px 24px;text-align:center;'>
-      <div style='width:56px;height:56px;border-radius:50%;background:#EDFBF3;border:1px solid #A8E6C3;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;'>
-        <svg width='24' height='24' fill='none' stroke='#1A6B40' stroke-width='1.8' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M5 13l4 4L19 7'/></svg>
-      </div>
-      <h2 style='font-family:Cormorant Garamond,serif;font-size:26px;font-style:italic;font-weight:400;margin-bottom:8px;'>匯入完成</h2>
-      <p id='smsg' style='font-size:13px;color:#8C8279;margin-bottom:28px;'></p>
-      <div style='display:flex;gap:10px;justify-content:center;'>
-        <button onclick='doReset()' class='btn-ol'>繼續匯入</button>
-        <button onclick='switchTab("payment")' class='btn'>查看訂單</button>
+  <!-- Step 3 -->
+  <div id="step3" style="display:none">
+    <div class="card">
+      <div class="success-box">
+        <div class="icon">✅</div>
+        <div class="msg">匯入完成！</div>
+        <div class="sub" id="importResult" style="margin:8px 0 24px"></div>
+        <button class="btn btn-primary" onclick="resetImport()">繼續匯入</button>
       </div>
     </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════ 付款管理 ══════════════════════════════ -->
+<div id="tab-payment" class="content" style="display:none">
+  <div class="filters">
+    <button class="filter-btn active" onclick="filterOrders('all',this)">全部</button>
+    <button class="filter-btn" onclick="filterOrders('待確認',this)">待確認</button>
+    <button class="filter-btn" onclick="filterOrders('已付款',this)">已付款</button>
+    <button class="filter-btn" onclick="filterOrders('已出貨',this)">已出貨</button>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>訂單</th><th>暱稱</th><th>商品</th><th>金額</th><th>狀態</th><th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="paymentBody">
+        <tr><td colspan="6"><div class="empty">載入中…</div></td></tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
-<!-- TAB 2 -->
-<div id='p-payment' style='display:none;'>
-  <div style='display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap;'>
-    <button class='pill on' id='fa' onclick='loadOrders("all")'>全部</button>
-    <button class='pill' id='fp' onclick='loadOrders("待確認")'>⏳ 待確認</button>
-    <button class='pill' id='fpa' onclick='loadOrders("已付款")'>✅ 已付款</button>
-    <button class='pill' id='fsh' onclick='loadOrders("已出貨")'>🚚 已出貨</button>
-    <button onclick='loadOrders(curF)' class='btn-ol' style='margin-left:auto;padding:6px 12px;font-size:11px;'>↺ 重新整理</button>
-  </div>
-  <div id='pload' style='display:none;text-align:center;padding:48px;'><div class='sp sp-k' style='margin:0 auto;'></div></div>
-  <div id='plist' style='display:flex;flex-direction:column;gap:10px;'></div>
-  <div id='del-bar' style='display:none;position:sticky;bottom:0;background:#fff;border-top:1px solid #E8E2D9;padding:12px 24px;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;z-index:10;'>
-    <div style='display:flex;align-items:center;gap:10px;'>
-      <input type='checkbox' id='cb-all' onchange='toggleAllCb(this.checked)' style='width:18px;height:18px;accent-color:#C0392B;cursor:pointer;'/>
-      <span id='del-count' style='font-size:13px;color:#4A4540;'></span>
-    </div>
-    <button onclick='doDeleteSelected()' id='del-btn' class='btn-red' disabled>🗑 刪除選取</button>
-  </div>
-  <div id='pempty' style='display:none;text-align:center;padding:64px 0;font-size:14px;color:#4A4540;'>此狀態沒有訂單</div>
-</div>
-
-<!-- TAB 3 -->
-<div id='p-supplier' style='display:none;'>
-  <div class='card' style='padding:24px;margin-bottom:16px;'>
-    <div style='display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;'>
+<!-- ══════════════════════════════ 檔口下單 ══════════════════════════════ -->
+<div id="tab-stall" class="content" style="display:none">
+  <div class="card">
+    <div class="card-title">檔口快速下單</div>
+    <p style="font-size:.76rem;color:#aaa;margin-bottom:16px">在現場直接幫顧客建立訂單</p>
+    <div style="display:grid;gap:12px">
       <div>
-        <h2 style='font-family:Cormorant Garamond,serif;font-size:22px;font-style:italic;font-weight:400;margin-bottom:4px;'>檔口下單統計</h2>
-        <p style='font-size:12px;color:#8C8279;'>依商品彙整數量，一鍵複製傳給檔口</p>
+        <label style="font-size:.74rem;color:#555;display:block;margin-bottom:5px">顧客暱稱</label>
+        <input id="stallNick" type="text" placeholder="輸入 LINE 暱稱" style="width:100%;border:1.5px solid #e5ddd5;border-radius:8px;padding:11px 13px;font-size:.84rem;font-family:inherit;outline:none;background:#faf8f5">
       </div>
-      <button onclick='loadSup()' class='btn-ol' style='flex-shrink:0;margin-left:16px;'>↺ 重新整理</button>
-    </div>
-    <div style='display:flex;gap:8px;margin-bottom:18px;'>
-      <button class='pill on' id='sa' onclick='setSF("all")'>全部</button>
-      <button class='pill' id='spa' onclick='setSF("paid")'>✅ 已付款</button>
-      <button class='pill' id='spe' onclick='setSF("pending")'>⏳ 待確認</button>
-    </div>
-    <div id='sload' style='display:none;text-align:center;padding:32px;'><div class='sp sp-k' style='margin:0 auto;'></div></div>
-    <div id='scont'><p style='font-size:13px;color:#C8BFB3;text-align:center;padding:32px 0;'>點「重新整理」載入</p></div>
-  </div>
-  <div id='scopy' class='card' style='padding:20px;display:none;'>
-    <div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;'>
-      <p style='font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#8C8279;'>複製下單訊息</p>
-      <button onclick='doCopyTxt()' class='btn' style='padding:8px 16px;'>複製</button>
-    </div>
-    <pre id='ctxt' style='font-size:12px;color:#4A4540;background:#F3F0EB;border-radius:10px;padding:14px;white-space:pre-wrap;line-height:1.8;'></pre>
-  </div>
-</div>
-
-</main>
-
-<div id='toast'><div id='ti' style='padding:12px 20px;border-radius:10px;font-size:13px;box-shadow:0 4px 20px rgba(26,23,19,.12);white-space:nowrap;'></div></div>
-
-<script>
-// ★ 你的 GAS API 網址
-var API = 'https://script.google.com/macros/s/AKfycby9JB0Y54FGdqVOPmWhjC83Nm8DcEW2XYXnO6Nnhx9yVWnPVcXbJCvBoo5l-oj4WDk9zA/exec';
-
-var LIFF_ID = "2009981035-gA1YwASZ";
-var STATUS_MAP = {
-  "待確認": { cls:"chip-pending",  icon:"⏳", label:"待確認" },
-  "已付款": { cls:"chip-paid",     icon:"✅", label:"已付款" },
-  "已出貨": { cls:"chip-shipped",  icon:"🚚", label:"已出貨" },
-  "取消"  : { cls:"chip-canceled", icon:"❌", label:"已取消" },
-};
-var liffProfile = null;
-
-// ── fetch 呼叫 GAS API ──────────────────────────────────────────
-function gasCall(action, params, onSuccess, onError) {
-  var qs = 'action=' + action;
-  for (var k in params) {
-    var v = params[k];
-    qs += '&' + k + '=' + encodeURIComponent(typeof v === 'object' ? JSON.stringify(v) : v);
-  }
-  fetch(API + '?' + qs)
-    .then(function(r) { return r.json(); })
-    .then(onSuccess)
-    .catch(onError || function(e) { console.error(e); });
-}
-
-// ── LIFF 初始化 ──────────────────────────────────────────────────
-window.addEventListener("load", function() {
-  if (typeof liff === 'undefined') { showLoginScreen(); return; }
-  liff.init({ liffId: LIFF_ID })
-    .then(function() {
-      if (liff.isLoggedIn()) { return liff.getProfile(); }
-      return null;
-    })
-    .then(function(profile) {
-      if (profile) { liffProfile = profile; showLiffProfile(profile); }
-      showLoginScreen();
-    })
-    .catch(function(err) {
-      console.log("LIFF init failed:", err);
-      showLoginScreen();
-    });
-});
-
-function showLiffProfile(profile) {
-  var card = document.getElementById("liff-profile-card");
-  card.style.display = "block";
-  document.getElementById("liff-name").textContent = profile.displayName;
-  var avatarEl = document.getElementById("liff-avatar");
-  var placeholderEl = document.getElementById("liff-avatar-placeholder");
-  if (profile.pictureUrl) {
-    avatarEl.src = profile.pictureUrl;
-    avatarEl.style.display = "block";
-    placeholderEl.style.display = "none";
-  }
-  document.getElementById("login-input").value = profile.displayName;
-  document.getElementById("manual-divider").style.display = "flex";
-}
-
-function showLoginScreen() {
-  document.getElementById("init-loading").style.transition = "opacity 0.4s ease";
-  document.getElementById("init-loading").style.opacity = "0";
-  setTimeout(function() {
-    document.getElementById("init-loading").style.display = "none";
-    var s1 = document.getElementById("screen-login");
-    s1.style.transition = "opacity 0.5s ease";
-    s1.style.opacity = "1";
-  }, 380);
-}
-
-// ── LIFF 一鍵查詢 ────────────────────────────────────────────────
-function handleLiffLogin() {
-  if (!liffProfile) return;
-  setLiffLoading(true);
-  queryOrders(liffProfile.displayName, liffProfile.pictureUrl);
-}
-
-// ── 手動查詢 ────────────────────────────────────────────────────
-function handleManualLogin() {
-  var nickname = document.getElementById("login-input").value.trim();
-  if (!nickname) { shakeInput(); return; }
-  document.getElementById("login-error").style.display = "none";
-  setManualLoading(true);
-  queryOrders(nickname, null);
-}
-
-// ── 共用查詢邏輯 ────────────────────────────────────────────────
-function queryOrders(nickname, avatarUrl) {
-  gasCall('query', { nickname: nickname },
-    function(result) {
-      setLiffLoading(false);
-      setManualLoading(false);
-      if (!result.success) {
-        document.getElementById("login-error").textContent = result.message || '查詢失敗';
-        document.getElementById("login-error").style.display = "block";
-        return;
-      }
-      showOrders(nickname, avatarUrl, result.orders);
-    },
-    function(err) {
-      setLiffLoading(false);
-      setManualLoading(false);
-      document.getElementById("login-error").textContent = "查詢失敗，請稍後再試";
-      document.getElementById("login-error").style.display = "block";
-    }
-  );
-}
-
-// ── 訂單畫面 ────────────────────────────────────────────────────
-function showOrders(nickname, avatarUrl, orders) {
-  var s1 = document.getElementById("screen-login");
-  s1.style.transition = "opacity 0.3s ease, transform 0.3s ease";
-  s1.style.opacity = "0"; s1.style.transform = "translateY(-10px)";
-  setTimeout(function() {
-    s1.style.display = "none";
-    var s2 = document.getElementById("screen-orders");
-    s2.style.opacity = "0"; s2.style.transform = "translateY(12px)";
-    s2.style.display = "flex";
-    setTimeout(function() {
-      s2.style.transition = "opacity 0.4s ease, transform 0.4s ease";
-      s2.style.opacity = "1"; s2.style.transform = "translateY(0)";
-    }, 20);
-  }, 280);
-
-  document.getElementById("orders-greeting").textContent = nickname;
-  showActionSection(nickname);
-
-  if (avatarUrl) {
-    var av = document.getElementById("orders-avatar");
-    av.src = avatarUrl; av.style.display = "block";
-  }
-
-  document.getElementById("orders-skeleton").style.display = "none";
-
-  if (!orders || !orders.length) {
-    document.getElementById("orders-empty").style.display = "block";
-    return;
-  }
-
-  var total  = orders.reduce(function(s,o){ return s + o.subtotal; }, 0);
-  var unpaid = orders.filter(function(o){ return o.status === "待確認"; }).length;
-  document.getElementById("stat-count").textContent = orders.length;
-  document.getElementById("stat-total").textContent = "NT$" + total.toLocaleString();
-  var su = document.getElementById("stat-unpaid");
-  su.textContent = unpaid > 0 ? unpaid + " 筆待付款" : "全部已確認 ✓";
-  su.style.color  = unpaid > 0 ? "#92661A" : "#1A6B40";
-  document.getElementById("orders-stats").style.display = "flex";
-
-  var list = document.getElementById("orders-list");
-  list.innerHTML = orders.map(function(o, idx) {
-    var st   = STATUS_MAP[o.status] || { cls:"chip-pending", icon:"📌", label: o.status };
-    var paid = o.status === "已付款" || o.status === "已出貨";
-    var spec = (o.spec && o.spec !== "" && o.spec !== "null")
-      ? "<p style=\"font-size:12px;color:#8C8279;margin-top:4px;font-family:'Noto Sans TC',sans-serif;\">規格：" + esc(o.spec) + "</p>" : "";
-    var note = (o.note && o.note !== "null" && o.note !== "")
-      ? "<p style=\"font-size:11px;color:#C8BFB3;margin-top:10px;padding-top:10px;border-top:1px solid #E8E2D9;font-family:'Noto Sans TC',sans-serif;\">備註：" + esc(o.note) + "</p>" : "";
-    var amt  = o.subtotal > 0
-      ? "<p style=\"font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:#1A1713;font-weight:400;\">NT$" + o.subtotal.toLocaleString() + "</p><p style=\"font-size:10px;margin-top:3px;color:" + (paid?"#1A6B40":"#92661A") + ";font-family:'Noto Sans TC',sans-serif;\">" + (paid?"✓ 已確認":"待付款") + "</p>"
-      : "<p style=\"font-size:11px;color:#C8BFB3;font-family:'Noto Sans TC',sans-serif;\">金額待確認</p>";
-    return "<div class=\"order-card fade-up\" style=\"animation-delay:" + (idx*65) + "ms;\">" +
-      "<div style=\"display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;\">" +
-        "<div><p style=\"font-family:monospace;font-size:10px;color:#8C8279;\">" + esc(o.orderId) + "</p><p style=\"font-family:'Noto Sans TC',sans-serif;font-size:11px;color:#C8BFB3;margin-top:3px;\">" + esc(o.timestamp) + "</p></div>" +
-        "<span class=\"chip " + st.cls + "\">" + st.icon + " " + st.label + "</span>" +
-      "</div>" +
-      "<hr class=\"deco-rule\" style=\"margin-bottom:12px;\">" +
-      "<div style=\"display:flex;align-items:flex-start;justify-content:space-between;gap:12px;\">" +
-        "<div style=\"flex:1;min-width:0;\">" +
-          "<div style=\"display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;\">" +
-            "<span style=\"font-family:monospace;font-size:11px;color:#4A4540;\">[" + esc(o.productCode) + "]</span>" +
-            "<span style=\"font-family:'Noto Sans TC',sans-serif;font-size:14px;color:#1A1713;\">" + esc(o.productName) + "</span>" +
-          "</div>" + spec +
-          "<p style=\"font-family:'Noto Sans TC',sans-serif;font-size:12px;color:#4A4540;margin-top:5px;\">數量：<strong>" + o.qty + "</strong> 件</p>" + note +
-        "</div>" +
-        "<div style=\"text-align:right;flex-shrink:0;\">" + amt + "</div>" +
-      "</div>" +
-    "</div>";
-  }).join("");
-}
-
-function goBack() {
-  var s2 = document.getElementById("screen-orders");
-  s2.style.transition = "opacity 0.3s ease, transform 0.3s ease";
-  s2.style.opacity = "0"; s2.style.transform = "translateY(-10px)";
-  setTimeout(function() {
-    s2.style.display = "none";
-    s2.style.opacity = ""; s2.style.transform = ""; s2.style.transition = "";
-    document.getElementById("orders-avatar").style.display = "none";
-    var s1 = document.getElementById("screen-login");
-    s1.style.opacity = "0"; s1.style.transform = "translateY(10px)";
-    s1.style.display = "flex";
-    setTimeout(function() {
-      s1.style.transition = "opacity 0.4s ease, transform 0.4s ease";
-      s1.style.opacity = "1"; s1.style.transform = "translateY(0)";
-      setTimeout(function(){ s1.style.transition = ""; }, 400);
-    }, 20);
-    document.getElementById("orders-skeleton").style.display = "block";
-    document.getElementById("orders-stats").style.display = "none";
-    document.getElementById("orders-list").innerHTML = "";
-    document.getElementById("orders-empty").style.display = "none";
-  }, 280);
-}
-
-function setLiffLoading(on) {
-  var btn = document.getElementById("liff-login-btn");
-  if (btn) btn.disabled = on;
-  var label   = document.getElementById("liff-btn-label");
-  var spinner = document.getElementById("liff-btn-spinner");
-  if (label)   label.style.display   = on ? "none" : "inline";
-  if (spinner) spinner.style.display = on ? "inline-block" : "none";
-}
-function setManualLoading(on) {
-  document.getElementById("login-btn").disabled = on;
-  document.getElementById("login-label").style.display  = on ? "none" : "inline";
-  document.getElementById("login-spinner").style.display = on ? "inline-block" : "none";
-}
-function shakeInput() {
-  var el = document.getElementById("login-input");
-  el.classList.add("shake");
-  setTimeout(function(){ el.classList.remove("shake"); }, 450);
-}
-function esc(s) {
-  if (!s) return "";
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-
-// ── 顧客行動按鈕 ────────────────────────────────────────────────
-var _confirmedNick = '';
-
-function showActionSection(nick) {
-  _confirmedNick = nick;
-  var sec = document.getElementById('action-section');
-  if (sec) sec.style.display = 'block';
-}
-
-function doConfirmOrdered() {
-  if (!_confirmedNick) return;
-  var btn = document.getElementById('btn-confirm');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span>回報中...</span>'; }
-  gasCall('confirmOrdered', { nickname: _confirmedNick },
-    function(r) {
-      if (r && r.success) {
-        var btns = document.getElementById('action-btns-card');
-        var suc  = document.getElementById('confirm-success-card');
-        if (btns) btns.style.display = 'none';
-        if (suc)  suc.style.display  = 'block';
-      } else {
-        if (btn) { btn.disabled = false; btn.innerHTML = '通知我已下單'; }
-      }
-    },
-    function() {
-      if (btn) { btn.disabled = false; btn.innerHTML = '通知我已下單'; }
-    }
-  );
-}
-</script>
-</body>
-</html>
+      <div>
+        <label style="font-size:.74rem;color:#555;display:block;margin-bottom:5px">商品代號</label>
+        <input id="stallCode" type="text" placeholder="例：E20" style="width:100%;border:1.5px solid #e5ddd5;border-radius:8px;padding:11px 13px;font-size:.84rem;font-family:inherit;outline:none;background:#faf8f5;text-transform:uppercase">
+      </div>
+      <div>
+        <label style="font-size:.74rem;color:#555;display:block;margin-bottom:5px">規格（可空白）</label>
+        <input id="stallSpec" type="text" placeholder="例：黑L" style="width:100%;border:1.5px solid #e5ddd5;border-radius:8px;padding:11px 13px;font-size:.84rem;font-family:inherit;outline:none;background:#faf8f5">
+      </div>
+      <div>
+        <label style="font-size:.74rem;color:#555;display:block;margin-bottom:5px">數量</label>
+        <input id="stallQty" type="number" value="1" min="1" style="width:100%;border:1.5px solid #e5ddd5;border-radius:8px;padding:11px 13px;font-size:.84rem;font-family:inherit;outline:none;background:#faf8f5">
+      </div>
+      <button class="btn btn-primary" style="width:100%;padding:14px" onclick
