@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HEYSARAH | 訂單查詢</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5ede8;
+      --gold: #b8975a;
+      --dark: #1a1a1a;
+      --card: #ffffff;
+      --green: #a8d5a2;
+      --muted: #999;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Noto Sans TC', sans-serif;
+      padding: 24px;
+    }
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 2.6rem;
+      color: var(--gold);
+    }
+    .subtitle {
+      letter-spacing: 8px;
+      font-size: 0.65rem;
+      color: var(--gold);
+      margin: 4px 0 40px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 28px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 40px rgba(0,0,0,0.07);
+    }
+    .card-title {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .input-row input {
+      flex: 1;
+      border: 1.5px solid #eee;
+      border-radius: 12px;
+      padding: 13px 16px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .input-row input:focus { border-color: var(--gold); }
+    .input-row button {
+      background: var(--dark);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      width: 48px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .input-row button:hover { opacity: .75; }
+    .hint {
+      font-size: 0.72rem;
+      color: #ccc;
+      margin-top: 10px;
+    }
+    .line-btn {
+      margin-top: 16px;
+      width: 100%;
+      max-width: 400px;
+      background: var(--green);
+      color: white;
+      border: none;
+      border-radius: 100px;
+      padding: 16px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      cursor: pointer;
+      opacity: .7;
+    }
+
+    /* ── 訂單結果 ── */
+    #result { margin-top: 24px; width: 100%; max-width: 400px; }
+    .order-card {
+      background: white;
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+    }
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .order-code {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .status-badge {
+      font-size: 0.7rem;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-weight: 500;
+    }
+    .status-待確認 { background: #fff3cd; color: #856404; }
+    .status-已付款 { background: #d1e7dd; color: #0a3622; }
+    .status-已出貨 { background: #cfe2ff; color: #084298; }
+    .status-取消   { background: #f8d7da; color: #842029; }
+    .order-name { font-size: 0.95rem; font-weight: 500; margin-bottom: 4px; }
+    .order-meta { font-size: 0.78rem; color: var(--muted); }
+    .order-price { font-size: 0.88rem; color: var(--gold); font-weight: 500; margin-top: 6px; }
+    .loading { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 20px; }
+    .empty { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 20px; }
+    .version {
+      position: fixed; bottom: 14px;
+      font-size: 0.6rem; color: #ccc; letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">HEYSARAH</div>
+  <div class="subtitle">SELECT SHOP</div>
+
+  <div class="card">
+    <div class="card-title">🔍 查詢您的專屬訂單</div>
+    <div class="input-row">
+      <input id="nameInput" placeholder="您的名稱..." onkeydown="if(event.key==='Enter') query()">
+      <button onclick="query()">›</button>
+    </div>
+    <div class="hint">※ 請輸入與社群相同的名稱</div>
+  </div>
+
+  <button class="line-btn">💬 LINE 帳號查詢（即將上線）</button>
+
+  <div id="result"></div>
+  <div class="version">v4.0 BUYER</div>
+
+  <script>
+    // ★ 換成你部署後的 GAS API 網址
+    const API = 'https://script.google.com/macros/s/AKfycby9JB0Y54FGdqVOPmWhjC83Nm8DcEW2XYXnO6Nnhx9yVWnPVcXbJCvBoo5l-oj4WDk9zA/exec';
+
+    async function query() {
+      const name = document.getElementById('nameInput').value.trim();
+      if (!name) return;
+      const el = document.getElementById('result');
+      el.innerHTML = '<div class="loading">查詢中⋯</div>';
+      try {
+        const res  = await fetch(`${API}?action=query&nickname=${encodeURIComponent(name)}`);
+        const data = await res.json();
+        if (!data.success || data.orders.length === 0) {
+          el.innerHTML = '<div class="empty">📋 查無訂單，請確認名稱是否與社群一致</div>';
+          return;
+        }
+        el.innerHTML = data.orders.map(o => `
+          <div class="order-card">
+            <div class="order-header">
+              <span class="order-code">${o.orderId}</span>
+              <span class="status-badge status-${o.status}">${o.status}</span>
+            </div>
+            <div class="order-name">[${o.productCode}] ${o.productName}</div>
+            <div class="order-meta">${o.spec ? '規格：' + o.spec + '　' : ''}數量：${o.qty} 件</div>
+            <div class="order-price">NT$ ${o.subtotal.toLocaleString()}</div>
+            <div class="order-meta" style="margin-top:4px">${o.timestamp}</div>
+          </div>`).join('');
+      } catch(e) {
+        el.innerHTML = '<div class="empty">❌ 連線失敗，請稍後再試</div>';
+      }
+    }
+  </script>
+</body>
+</html>
