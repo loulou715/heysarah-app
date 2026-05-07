@@ -1,153 +1,220 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HEYSARAH | 訂單查詢</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="https://script.google.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    body{background:#f0ebe3;min-height:100vh;font-family:'Noto Sans TC',sans-serif;padding:32px 16px 64px;display:flex;flex-direction:column;align-items:center}
-    .wrap{width:100%;max-width:520px}
-    .logo-box{background:#fff;border-radius:20px;padding:28px 32px;text-align:center;margin-bottom:12px}
-    .logo-box img{width:100%;max-width:300px;height:auto;display:block;margin:0 auto}
-    .tagline{text-align:center;font-size:.6rem;letter-spacing:5px;color:#aaa;margin-bottom:28px;text-transform:uppercase}
-    .div{display:flex;align-items:center;gap:10px;margin:24px 0 14px}
-    .div::before,.div::after{content:'';flex:1;height:1px;background:#ddd8d0}
-    .div span{font-size:.68rem;letter-spacing:4px;color:#bbb;white-space:nowrap}
-    .social-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .soc{background:#fff;border-radius:16px;padding:18px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;color:#444;transition:transform .15s}
-    .soc:hover{transform:translateY(-2px)}
-    .soc svg{width:38px;height:38px}
-    .soc span{font-size:.74rem}
-    .query-card{background:#fff;border-radius:20px;padding:24px 20px}
-    .q-intro{text-align:center;font-size:.84rem;color:#555;line-height:1.9;margin-bottom:20px}
-    .f-label{font-size:.76rem;font-weight:500;color:#333;margin-bottom:6px;display:block}
-    .f-input{width:100%;border:1.5px solid #e5ddd5;border-radius:10px;padding:13px 15px;font-size:.88rem;font-family:inherit;background:#faf8f5;outline:none;transition:border-color .2s;margin-bottom:10px}
-    .f-input:focus{border-color:#b8975a}
-    .f-input::placeholder{color:#ccc}
-    .q-btn{width:100%;background:#1a1a1a;color:#fff;border:none;border-radius:10px;padding:15px;font-size:.88rem;font-family:inherit;font-weight:500;letter-spacing:3px;cursor:pointer;transition:opacity .2s;margin-bottom:12px}
-    .q-btn:hover{opacity:.8}
-    .q-btn:disabled{opacity:.5;cursor:default}
-    .q-hint{font-size:.68rem;color:#bbb;text-align:center;line-height:2}
-    #result{margin-top:10px;width:100%}
-    .r-card{background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:8px}
-    .r-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-    .r-id{font-size:.7rem;color:#bbb;font-family:monospace}
-    .badge{font-size:.68rem;padding:3px 10px;border-radius:100px;font-weight:500;display:inline-block}
-    .s-待確認{background:#fff3cd;color:#856404}
-    .s-已付款{background:#d1e7dd;color:#0a3622}
-    .s-已出貨{background:#cfe2ff;color:#084298}
-    .s-取消{background:#f8d7da;color:#842029}
-    .r-name{font-size:.9rem;font-weight:500;margin-bottom:3px}
-    .r-meta{font-size:.74rem;color:#aaa}
-    .r-price{font-size:.88rem;color:#b8975a;font-weight:500;margin-top:5px}
-    .r-msg{text-align:center;color:#bbb;font-size:.82rem;padding:24px}
-    .fmt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .fmt{background:#fff;border-radius:12px;padding:14px 8px;text-align:center}
-    .fmt-code{font-family:monospace;font-size:.82rem;font-weight:600;color:#1a1a1a;margin-bottom:3px}
-    .fmt-desc{font-size:.62rem;color:#bbb}
-    .footer{margin-top:32px;text-align:center;font-size:.58rem;letter-spacing:4px;color:#bbb}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>HEYSARAH — 訂單查詢</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#faf9f7;color:#2c2c2c;min-height:100vh}
+.hero{text-align:center;padding:44px 20px 30px;background:linear-gradient(180deg,#f5f0e8 0%,#faf9f7 100%)}
+.logo-wrap{width:90px;height:90px;border-radius:50%;background:#fff;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.08);overflow:hidden}
+.logo-wrap img{width:80px;height:80px;object-fit:contain}
+.brand{font-family:'Cormorant Garamond',serif;font-size:32px;color:#b8924a;font-style:italic;letter-spacing:1px}
+.tagline{font-size:11px;letter-spacing:4px;color:#b8924a;opacity:.7;margin-top:4px;text-transform:uppercase}
+
+.section{padding:20px 16px;max-width:480px;margin:0 auto}
+.section-title{font-size:11px;letter-spacing:3px;color:#b8924a;text-align:center;margin-bottom:16px;text-transform:uppercase}
+
+.social-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.social-btn{display:flex;align-items:center;gap:7px;padding:10px 18px;border-radius:50px;text-decoration:none;font-size:13px;font-weight:500;transition:all .2s;border:1.5px solid transparent}
+.social-btn.ig{background:#fff;color:#2c2c2c;border-color:#e8e0d4;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.social-btn.ig:hover{border-color:#b8924a;color:#b8924a}
+.social-btn.web{background:#2c2c2c;color:#fff}
+.social-btn.web:hover{background:#444}
+.social-btn.line{background:#06c755;color:#fff}
+.social-btn.line:hover{background:#05b34d}
+.social-icon{width:18px;height:18px;object-fit:contain}
+
+.query-card{background:#fff;border-radius:16px;padding:24px;box-shadow:0 4px 24px rgba(0,0,0,.07);margin-bottom:16px}
+.query-card h2{font-family:'Cormorant Garamond',serif;font-size:22px;color:#b8924a;margin-bottom:18px;text-align:center;font-style:italic}
+.input-group{margin-bottom:14px}
+.input-group label{display:block;font-size:11px;letter-spacing:2px;color:#999;margin-bottom:6px;text-transform:uppercase}
+.input-group input{width:100%;padding:12px 16px;border:1.5px solid #e8e0d4;border-radius:10px;font-size:14px;font-family:inherit;background:#fdfcfb;transition:border .2s}
+.input-group input:focus{outline:none;border-color:#b8924a}
+.query-btn{width:100%;padding:13px;background:#2c2c2c;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;letter-spacing:1px;transition:background .2s}
+.query-btn:hover{background:#444}
+.query-btn:disabled{background:#ccc;cursor:not-allowed}
+
+/* 收據樣式 */
+.receipt-wrap{margin-top:4px}
+.receipt-card{background:#fff;border-radius:16px;padding:22px;box-shadow:0 4px 24px rgba(0,0,0,.08);margin-bottom:12px}
+.receipt-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.receipt-date{font-size:12px;color:#aaa}
+.status-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700}
+.status-chip.待確認{background:#fef3c7;color:#b45309}
+.status-chip.已付款{background:#dbeafe;color:#1d4ed8}
+.status-chip.已出貨{background:#d1fae5;color:#065f46}
+.status-chip.取消{background:#fee2e2;color:#dc2626}
+.order-item{margin-bottom:14px}
+.item-top{display:flex;justify-content:space-between;align-items:baseline}
+.item-code{font-weight:700;font-size:15px}
+.item-qty{font-size:12px;color:#aaa;margin-left:4px}
+.item-price{font-weight:700;font-size:15px;color:#2c2c2c}
+.item-name{font-size:12px;color:#999;margin:2px 0}
+.item-spec{font-size:12px;color:#666;display:flex;justify-content:space-between;padding:2px 0 2px 8px}
+.receipt-divider{border:none;border-top:1px dashed #e8e0d4;margin:14px 0}
+.receipt-row{display:flex;justify-content:space-between;font-size:13px;color:#888;margin-bottom:6px}
+.receipt-total{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.receipt-total .label{font-size:12px;letter-spacing:2px;color:#b8924a;text-transform:uppercase;font-weight:700}
+.receipt-total .amount{font-family:'Cormorant Garamond',serif;font-size:32px;color:#b8924a;font-weight:600}
+
+.no-result{text-align:center;padding:32px;color:#bbb;font-size:13px;background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+
+.format-card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+.format-card pre{font-size:12px;color:#888;line-height:2;font-family:inherit;white-space:pre-wrap}
+.format-ex{background:#faf9f7;border-radius:8px;padding:12px 14px;margin-top:10px}
+.format-ex span{color:#2c2c2c;font-weight:600}
+
+footer{text-align:center;padding:32px 20px;font-size:11px;color:#ccc;letter-spacing:1px}
+</style>
 </head>
 <body>
-<div class="wrap">
 
-  <div class="logo-box">
+<div class="hero">
+  <div class="logo-wrap">
     <img src="/logo.png" alt="HEYSARAH">
   </div>
-  <p class="tagline">BE GORGEOUS &nbsp;·&nbsp; YOU HAVE INFINITE POTENTIAL</p>
-
-  <div class="div"><span>找 到 我 們</span></div>
-  <div class="social-grid">
-    <a href="https://www.instagram.com/heysarah_tw/" target="_blank" class="soc">
-      <svg viewBox="0 0 38 38" fill="none">
-        <defs><radialGradient id="ig" cx="30%" cy="110%" r="140%">
-          <stop offset="0%" stop-color="#fdf497"/>
-          <stop offset="10%" stop-color="#fd5949"/>
-          <stop offset="50%" stop-color="#d6249f"/>
-          <stop offset="90%" stop-color="#285AEB"/>
-        </radialGradient></defs>
-        <rect width="38" height="38" rx="9" fill="url(#ig)"/>
-        <rect x="10" y="10" width="18" height="18" rx="5" stroke="white" stroke-width="2" fill="none"/>
-        <circle cx="19" cy="19" r="5" stroke="white" stroke-width="2" fill="none"/>
-        <circle cx="25.5" cy="12.5" r="1.5" fill="white"/>
-      </svg>
-      <span>Instagram</span>
-    </a>
-    <a href="https://www.heysarah-tw.com/" target="_blank" class="soc">
-      <svg viewBox="0 0 38 38" fill="none">
-        <rect width="38" height="38" rx="9" fill="#ebebeb"/>
-        <circle cx="19" cy="19" r="9" stroke="#555" stroke-width="1.8" fill="none"/>
-        <ellipse cx="19" cy="19" rx="4.5" ry="9" stroke="#555" stroke-width="1.4" fill="none"/>
-        <line x1="10" y1="19" x2="28" y2="19" stroke="#555" stroke-width="1.4"/>
-        <line x1="11.5" y1="14.5" x2="26.5" y2="14.5" stroke="#555" stroke-width="1.1"/>
-        <line x1="11.5" y1="23.5" x2="26.5" y2="23.5" stroke="#555" stroke-width="1.1"/>
-      </svg>
-      <span>官方網站</span>
-    </a>
-    <a href="https://lin.ee/yNryEg1" target="_blank" class="soc">
-      <svg viewBox="0 0 38 38" fill="none">
-        <rect width="38" height="38" rx="9" fill="#06C755"/>
-        <path d="M19 8C12.4 8 7 12.3 7 17.5c0 3.2 1.9 6 5 7.8-.2.6-.7 2.2-.8 2.5-.1.4.1.4.3.3.2-.1 2-1.4 2.9-1.9.8.1 1.6.2 2.4.2 6.6 0 12-4.3 12-9.5S25.6 8 19 8z" fill="white"/>
-      </svg>
-      <span>LINE@</span>
-    </a>
-  </div>
-
-  <div class="div"><span>訂 單 查 詢</span></div>
-  <div class="query-card">
-    <p class="q-intro">請輸入您在 LINE 社群的顯示暱稱<br>即可查詢訂單記錄與付款狀態</p>
-    <label class="f-label">LINE 暱稱</label>
-    <input id="nameInput" class="f-input" placeholder="輸入您的 LINE 顯示名稱" onkeydown="if(event.key==='Enter')query()">
-    <button id="queryBtn" class="q-btn" onclick="query()">查 詢 訂 單</button>
-    <p class="q-hint">暱稱需與 LINE 群組顯示名稱完全一致<br>包含大小寫與特殊符號</p>
-  </div>
-
-  <div id="result"></div>
-
-  <div class="div"><span>下 單 格 式</span></div>
-  <div class="fmt-grid">
-    <div class="fmt"><div class="fmt-code">A01黑L+1</div><div class="fmt-desc">商品 規格 數量</div></div>
-    <div class="fmt"><div class="fmt-code">A01白+2</div><div class="fmt-desc">商品 規格 數量</div></div>
-    <div class="fmt"><div class="fmt-code">B01+1</div><div class="fmt-desc">商品 數量</div></div>
-  </div>
-
-  <div class="footer">HEYSARAH &nbsp;·&nbsp; @HEYSARAH_TW &nbsp;·&nbsp; HEYSARAH-TW.COM</div>
-
+  <div class="brand">HEYSARAH</div>
+  <div class="tagline">SELECT SHOP</div>
 </div>
+
+<div class="section">
+  <div class="section-title">找到我們</div>
+  <div class="social-row">
+    <a class="social-btn ig" href="https://www.instagram.com/heysarah_tw/" target="_blank">
+      <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor" stroke="none"/></svg>
+      Instagram
+    </a>
+    <a class="social-btn web" href="https://www.heysarah-tw.com/" target="_blank">
+      <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+      官方網站
+    </a>
+    <a class="social-btn line" href="https://lin.ee/yNryEg1" target="_blank">
+      <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19.365 9.89c.50 0 .906.41.906.91s-.405.91-.906.91h-2.44v1.44h2.44c.5 0 .906.41.906.91s-.405.91-.906.91H15.97a.908.908 0 01-.906-.91V9.89c0-.5.405-.91.906-.91h3.395zm-5.51 0c.5 0 .905.41.905.91v4.17c0 .5-.405.91-.906.91s-.905-.41-.905-.91V9.89c0-.5.405-.91.905-.91zm-2.38 4.17l-2.73-3.67v3.58c0 .5-.405.91-.905.91s-.906-.41-.906-.91V9.89c0-.5.405-.91.906-.91.27 0 .5.11.68.3l2.73 3.67V9.89c0-.5.405-.91.905-.91s.906.41.906.91v4.17c0 .5-.405.91-.906.91-.27 0-.5-.11-.68-.3zM7.27 9.89c.5 0 .905.41.905.91v4.17c0 .5-.405.91-.905.91s-.906-.41-.906-.91V9.89c0-.5.405-.41.906-.91zM12 2C6.477 2 2 6.038 2 11c0 3.68 2.29 6.87 5.67 8.5-.1.37-.65 2.48-.68 2.62-.04.18.07.18.14.13.07-.04 3.3-2.18 4.64-3.07.73.1 1.48.15 2.23.15 5.523 0 10-4.038 10-9S17.523 2 12 2z"/></svg>
+      LINE@
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">訂單查詢</div>
+  <div class="query-card">
+    <h2>查詢我的訂單</h2>
+    <div class="input-group">
+      <label>LINE 暱稱</label>
+      <input id="nickInput" type="text" placeholder="輸入您的 LINE 暱稱" autocomplete="off">
+    </div>
+    <button class="query-btn" id="queryBtn" onclick="doQuery()">🔍 查詢訂單</button>
+  </div>
+  <div id="results"></div>
+</div>
+
+<div class="section">
+  <div class="section-title">下單格式</div>
+  <div class="format-card">
+    <div style="font-size:12px;color:#aaa;margin-bottom:10px">在群組中依照以下格式留言下單：</div>
+    <div class="format-ex">
+      <div style="font-size:11px;color:#aaa;margin-bottom:6px">基本格式</div>
+      <pre><span>商品代號 顏色/尺寸+數量</span></pre>
+    </div>
+    <div class="format-ex" style="margin-top:8px">
+      <div style="font-size:11px;color:#aaa;margin-bottom:6px">範例</div>
+      <pre><span>EX: E20奶茶+1
+EX: E43 37+1
+EX: E20奶茶+1藍+2</span></pre>
+    </div>
+  </div>
+</div>
+
+<footer>© 2025 HEYSARAH SELECT SHOP<br>All rights reserved.</footer>
+
 <script>
-  var API='https://script.google.com/macros/s/AKfycbxAampl5u_AKoSlrpP7b3nXiVu-L9ZmmKslS-Qaa-ya_G0UwkUQCIdU8xUKMipu1-hCHw/exec';
-  async function query(){
-    var name=document.getElementById('nameInput').value.trim();
-    if(!name)return;
-    var btn=document.getElementById('queryBtn'),el=document.getElementById('result');
-    btn.disabled=true;btn.textContent='查詢中...';
-    el.innerHTML='<div class="r-msg">查詢中⋯</div>';
-    try{
-      var res=await fetch(API+'?action=query&nickname='+encodeURIComponent(name));
-      var data=await res.json();
-      if(!data.success||!data.orders||!data.orders.length){
-        el.innerHTML='<div class="r-msg">📋 查無訂單，請確認名稱是否與社群一致</div>';
-      }else{
-        el.innerHTML=data.orders.map(function(o){
-          return '<div class="r-card">'+
-            '<div class="r-head"><span class="r-id">'+esc(o.orderId)+'</span>'+
-            '<span class="badge s-'+esc(o.status)+'">'+esc(o.status)+'</span></div>'+
-            '<div class="r-name">['+esc(o.productCode)+'] '+esc(o.productName||o.productCode)+'</div>'+
-            '<div class="r-meta">'+(o.spec?'規格：'+esc(o.spec)+'　':'')+' 數量：'+o.qty+' 件</div>'+
-            '<div class="r-price">NT$ '+Number(o.subtotal||0).toLocaleString()+'</div>'+
-            '<div class="r-meta" style="margin-top:4px">'+esc(o.timestamp)+'</div>'+
-            '</div>';
-        }).join('');
-      }
-    }catch(e){el.innerHTML='<div class="r-msg">❌ 連線失敗，請稍後再試</div>';}
-    btn.disabled=false;btn.textContent='查 詢 訂 單';
+var GAS = 'https://script.google.com/macros/s/AKfycbxAampl5u_AKoSlrpP7b3nXiVu-L9ZmmKslS-Qaa-ya_G0UwkUQCIdU8xUKMipu1-hCHw/exec';
+
+document.getElementById('nickInput').addEventListener('keydown', function(e){
+  if(e.key==='Enter') doQuery();
+});
+
+function doQuery(){
+  var nick=document.getElementById('nickInput').value.trim();
+  if(!nick){ showMsg('請輸入 LINE 暱稱'); return; }
+  var btn=document.getElementById('queryBtn');
+  btn.disabled=true; btn.textContent='查詢中...';
+  var url=GAS+'?action=queryOrders&nickname='+encodeURIComponent(nick);
+  fetch(url).then(function(r){ return r.json(); })
+    .then(function(d){
+      btn.disabled=false; btn.textContent='🔍 查詢訂單';
+      if(d.success===false){ showMsg('❌ '+d.message); return; }
+      renderResults(d.orders||[]);
+    })
+    .catch(function(e){
+      btn.disabled=false; btn.textContent='🔍 查詢訂單';
+      showMsg('❌ 網路錯誤，請稍後再試');
+    });
+}
+
+function showMsg(msg){
+  document.getElementById('results').innerHTML='<div class="no-result">'+msg+'</div>';
+}
+
+function fmt(n){ return n>0?'$'+Number(n).toLocaleString():'—'; }
+
+function renderResults(orders){
+  if(!orders.length){
+    document.getElementById('results').innerHTML='<div class="no-result">查無訂單，請確認暱稱是否正確</div>';
+    return;
   }
-  function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):''}
+
+  // 依日期分組
+  var groups={}, gkeys=[];
+  orders.forEach(function(o){
+    var date=(o.timestamp||'').split(' ')[0]||'未知日期';
+    var key=date+'_'+o.status;
+    if(!groups[key]){ groups[key]={date:date,status:o.status,items:[],total:0}; gkeys.push(key); }
+    groups[key].items.push(o);
+    groups[key].total+=o.subtotal||0;
+  });
+
+  var html='<div class="receipt-wrap">';
+  gkeys.forEach(function(key){
+    var g=groups[key];
+    // 合併同代號+規格
+    var merged={}, mkeys=[];
+    g.items.forEach(function(o){
+      var mk=o.productCode+'_'+(o.spec||'');
+      if(!merged[mk]){ merged[mk]={code:o.productCode,name:o.productName,spec:o.spec,qty:0,subtotal:0}; mkeys.push(mk); }
+      merged[mk].qty+=o.qty; merged[mk].subtotal+=o.subtotal||0;
+    });
+
+    html+='<div class="receipt-card">';
+    html+='<div class="receipt-head">'+
+      '<span class="receipt-date">📅 '+g.date+'</span>'+
+      '<span class="status-chip '+g.status+'">'+g.status+'</span></div>';
+
+    mkeys.forEach(function(mk){
+      var item=merged[mk];
+      html+='<div class="order-item">'+
+        '<div class="item-top">'+
+          '<div><span class="item-code">'+item.code+'</span><span class="item-qty">×'+item.qty+'</span></div>'+
+          '<span class="item-price">'+(item.subtotal>0?fmt(item.subtotal):'—')+'</span>'+
+        '</div>'+
+        (item.name&&item.name!==item.code?'<div class="item-name">'+item.name+'</div>':'')+
+        '<div class="item-spec"><span>- '+(item.spec||'無規格')+'</span><span>×'+item.qty+'</span></div>'+
+      '</div>';
+    });
+
+    html+='<hr class="receipt-divider">';
+    html+='<div class="receipt-row"><span>商品小計</span><span>'+fmt(g.total)+'</span></div>';
+    html+='<div class="receipt-total"><span class="label">Total</span><span class="amount">'+fmt(g.total)+'</span></div>';
+    html+='</div>';
+  });
+  html+='</div>';
+  document.getElementById('results').innerHTML=html;
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
 </script>
 </body>
 </html>
