@@ -48,8 +48,6 @@
     .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
     .filter-btn{border:1.5px solid #e0e0e0;border-radius:100px;padding:6px 14px;font-size:.74rem;font-family:inherit;background:#fff;color:#666;cursor:pointer;transition:all .2s}
     .filter-btn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
-    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:100px;font-size:.8rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
-    .toast.show{opacity:1}
     .import-table{width:100%;border-collapse:collapse;font-size:.76rem}
     .import-table th{background:#f8f8f8;padding:8px 10px;text-align:left;color:#666;font-weight:500}
     .import-table td{padding:8px 10px;border-bottom:1px solid #f0f0f0}
@@ -61,11 +59,18 @@
     .empty{text-align:center;color:#bbb;padding:40px 20px;font-size:.82rem}
     .success-box{text-align:center;padding:32px 20px}
     .success-box .icon{font-size:3rem;margin-bottom:12px}
-    .success-box .msg{font-size:.9rem;color:#333;margin-bottom:6px}
-    .success-box .sub{font-size:.76rem;color:#aaa}
-    .f-label{font-size:.74rem;color:#555;display:block;margin-bottom:5px}
-    .f-inp{width:100%;border:1.5px solid #e5ddd5;border-radius:8px;padding:11px 13px;font-size:.84rem;font-family:inherit;outline:none;background:#faf8f5;transition:border-color .2s}
-    .f-inp:focus{border-color:#b8975a}
+    .success-box .msg{font-size:.9rem;color:#333;margin-bottom:6px;font-weight:500}
+    .success-box .sub{font-size:.76rem;color:#aaa;margin:8px 0 24px}
+    .summary-tbl{width:100%;border-collapse:collapse;font-size:.8rem}
+    .summary-tbl th{background:#1a1a1a;color:#fff;padding:10px 14px;text-align:left;font-weight:400;font-size:.74rem;letter-spacing:1px}
+    .summary-tbl td{padding:12px 14px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+    .summary-tbl tr:last-child td{border-bottom:none}
+    .summary-tbl tr:hover td{background:#faf8f5}
+    .qty-badge{display:inline-block;background:#1a1a1a;color:#fff;border-radius:100px;padding:3px 14px;font-size:.82rem;font-weight:500;min-width:40px;text-align:center}
+    .code-tag{font-family:monospace;font-size:.8rem;background:#f0ebe3;color:#1a1a1a;border-radius:6px;padding:3px 8px;font-weight:600}
+    .total-bar{background:#f8f8f8;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:.78rem;color:#555}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:100px;font-size:.8rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap}
+    .toast.show{opacity:1}
   </style>
 </head>
 <body>
@@ -78,10 +83,10 @@
 <div class="tabs">
   <div class="tab active" onclick="switchTab('import')">📥 批次匯入</div>
   <div class="tab" onclick="switchTab('payment')">💳 付款管理</div>
-  <div class="tab" onclick="switchTab('stall')">🏪 檔口下單</div>
+  <div class="tab" onclick="switchTab('summary')">📦 叫貨彙整</div>
 </div>
 
-<!-- ─── 批次匯入 ─── -->
+<!-- ═══ 批次匯入 ═══ -->
 <div id="tab-import" class="content">
   <div class="steps">
     <div class="step active" id="s1">1</div>
@@ -102,8 +107,8 @@
       <div class="hints">
         <span class="hint-chip">✓ 時間戳記格式</span>
         <span class="hint-chip">✓ 暱稱獨立一行</span>
-        <span class="hint-chip">✓ E20灰1（無加號）</span>
-        <span class="hint-chip">✓ E16 黑+2</span>
+        <span class="hint-chip">✓ E06 粉+1灰+1（一行多筆）</span>
+        <span class="hint-chip">✓ E11 +1（無規格）</span>
       </div>
       <div id="countBar" class="count-bar"></div>
       <div style="display:flex;justify-content:flex-end;margin-top:16px">
@@ -118,7 +123,7 @@
         <span>確認解析結果</span>
         <span id="parseCount" style="font-size:.74rem;color:#aaa"></span>
       </div>
-      <p style="font-size:.76rem;color:#aaa;margin-bottom:14px">請確認以下訂單資料，可在表格內直接修改</p>
+      <p style="font-size:.76rem;color:#aaa;margin-bottom:14px">可在表格內直接修改，✕ 可刪除單筆</p>
       <div style="overflow-x:auto">
         <table class="import-table">
           <thead><tr><th>暱稱</th><th>商品代號</th><th>規格</th><th>數量</th><th></th></tr></thead>
@@ -137,14 +142,14 @@
       <div class="success-box">
         <div class="icon">✅</div>
         <div class="msg">匯入完成！</div>
-        <div class="sub" id="importResult" style="margin:8px 0 24px"></div>
+        <div class="sub" id="importResult"></div>
         <button class="btn btn-primary" onclick="resetImport()">繼續匯入</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ─── 付款管理 ─── -->
+<!-- ═══ 付款管理 ═══ -->
 <div id="tab-payment" class="content" style="display:none">
   <div class="filters">
     <button class="filter-btn active" onclick="filterOrders('all',this)">全部</button>
@@ -160,30 +165,23 @@
   </div>
 </div>
 
-<!-- ─── 檔口下單 ─── -->
-<div id="tab-stall" class="content" style="display:none">
-  <div class="card">
-    <div class="card-title">檔口快速下單</div>
-    <p style="font-size:.76rem;color:#aaa;margin-bottom:16px">在現場直接幫顧客建立訂單</p>
-    <div style="display:grid;gap:12px">
-      <div>
-        <label class="f-label">顧客暱稱</label>
-        <input id="stallNick" class="f-inp" type="text" placeholder="輸入 LINE 暱稱">
-      </div>
-      <div>
-        <label class="f-label">商品代號</label>
-        <input id="stallCode" class="f-inp" type="text" placeholder="例：E20" style="text-transform:uppercase">
-      </div>
-      <div>
-        <label class="f-label">規格（可空白）</label>
-        <input id="stallSpec" class="f-inp" type="text" placeholder="例：黑L">
-      </div>
-      <div>
-        <label class="f-label">數量</label>
-        <input id="stallQty" class="f-inp" type="number" value="1" min="1" style="width:100px">
-      </div>
-      <button class="btn btn-primary" style="width:100%;padding:14px" onclick="doStallOrder()">建立訂單</button>
+<!-- ═══ 叫貨彙整 ═══ -->
+<div id="tab-summary" class="content" style="display:none">
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title">
+      <span>叫貨彙整</span>
+      <button class="btn btn-ghost" style="padding:6px 14px;font-size:.74rem" onclick="loadSummary()">🔄 重新整理</button>
     </div>
+    <p style="font-size:.76rem;color:#aaa;margin-bottom:16px">依商品款號自動統計總件數，系統直接從訂單辨識，無需建立商品目錄</p>
+    <div class="filters" id="summaryFilters">
+      <button class="filter-btn active" onclick="setSummaryFilter('all',this)">全部訂單</button>
+      <button class="filter-btn" onclick="setSummaryFilter('待確認',this)">待確認</button>
+      <button class="filter-btn" onclick="setSummaryFilter('已付款',this)">已付款</button>
+    </div>
+  </div>
+
+  <div id="summaryContent">
+    <div class="empty">點上方「重新整理」載入叫貨清單</div>
   </div>
 </div>
 
@@ -192,7 +190,7 @@
 <script>
 var API = 'https://script.google.com/macros/s/AKfycbxAampl5u_AKoSlrpP7b3nXiVu-L9ZmmKslS-Qaa-ya_G0UwkUQCIdU8xUKMipu1-hCHw/exec';
 
-/* ── API ── */
+/* ── 基礎工具 ── */
 function gasCall(action, params, onSuccess, onError) {
   var qs = 'action=' + action;
   for (var k in params) {
@@ -217,19 +215,28 @@ function esc(s) {
   return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
 }
 
-/* ── 分頁 ── */
+/* ── 分頁切換 ── */
 function switchTab(tab) {
   document.getElementById('tab-import').style.display  = tab==='import'  ? 'block' : 'none';
   document.getElementById('tab-payment').style.display = tab==='payment' ? 'block' : 'none';
-  document.getElementById('tab-stall').style.display   = tab==='stall'   ? 'block' : 'none';
+  document.getElementById('tab-summary').style.display = tab==='summary' ? 'block' : 'none';
   var tabs = document.querySelectorAll('.tab');
   tabs[0].classList.toggle('active', tab==='import');
   tabs[1].classList.toggle('active', tab==='payment');
-  tabs[2].classList.toggle('active', tab==='stall');
+  tabs[2].classList.toggle('active', tab==='summary');
   if (tab === 'payment') loadOrders('all');
+  if (tab === 'summary') loadSummary();
 }
 
-/* ══ 解析核心 ══ */
+/* ══════════════════════════════════════
+   解析核心（強化版）
+   支援：
+   - HH:MM 暱稱 商品+規格+數量
+   - 一行多筆：E06 粉+1灰+1
+   - 數量後跟規格：E09 m+1深藍
+   - 無規格：E11 +1
+   - 自動跳過日期行、系統訊息、對話
+══════════════════════════════════════ */
 function normalize(t) {
   return t
     .replace(/[＋]/g, '+')
@@ -237,6 +244,13 @@ function normalize(t) {
     .replace(/[ａ-ｚ]/g, function(c){ return String.fromCharCode(c.charCodeAt(0)-0xFEE0); })
     .replace(/[０-９]/g, function(c){ return String.fromCharCode(c.charCodeAt(0)-0xFF10+48); })
     .replace(/　/g, ' ');
+}
+
+function shouldSkip(line) {
+  if (/^\d{4}[.\-\/]\d{1,2}[.\-\/]\d{1,2}/.test(line)) return true;  // 日期行
+  if (/已收回訊息/.test(line)) return true;                             // 系統訊息
+  if (/^管理員/.test(line)) return true;                                // 管理員訊息
+  return false;
 }
 
 function parseOrders(text) {
@@ -247,46 +261,68 @@ function parseOrders(text) {
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i].trim();
     if (!line) continue;
+    if (shouldSkip(line)) continue;
 
     var nick = '';
-    var orderText = line;
+    var orderPart = line;
 
-    // HH:MM 暱稱 商品...
+    // 格式：HH:MM 暱稱 訂單內容
     var pm = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s+(\S+)\s+(.*)/);
     if (pm) {
       nick = pm[2];
-      orderText = pm[3];
+      orderPart = pm[3];
       lastNick = nick;
     } else {
-      // 如果這行沒有商品代號格式，視為暱稱行
       if (!/[A-Za-z]\d{2}/.test(line)) {
-        lastNick = line;
+        // 無商品代號 → 當作暱稱行（長度合理且無網址）
+        if (line.length <= 20 && line.indexOf('http') === -1) {
+          lastNick = line;
+        }
         continue;
       }
       nick = lastNick;
     }
 
-    // 商品代號 [規格] +數量  或  商品代號 [規格] 數量
-    var m = orderText.match(/^([A-Za-z]{1,2}\d{2,3})\s*(.*?)\s*\+(\d+)\s*$/);
-    if (!m) {
-      m = orderText.match(/^([A-Za-z]{1,2}\d{2,3})\s*(.*?)\s*(\d+)\s*$/);
+    // 提取商品代號
+    var codeM = orderPart.match(/^([A-Za-z]{1,2}\d{2,3})\s*(.*)/);
+    if (!codeM) continue;
+
+    var productCode = codeM[1].toUpperCase();
+    var rest = codeM[2];
+
+    // 找出所有「規格+數量」組合（處理一行多筆）
+    var pairs = [];
+    var re = /([^+\d]*?)\s*\+(\d+)/g;
+    var m;
+    var lastEnd = 0;
+    while ((m = re.exec(rest)) !== null) {
+      pairs.push({ spec: m[1].trim(), qty: parseInt(m[2]) });
+      lastEnd = m.index + m[0].length;
     }
 
-    if (m) {
-      var qty = parseInt(m[3]);
-      if (qty > 0 && qty < 100) {
-        results.push({
-          nickname: nick || '未填',
-          productCode: m[1].toUpperCase(),
-          spec: m[2].trim(),
-          qty: qty
-        });
+    if (pairs.length > 0) {
+      // 處理 +數量 之後的規格殘餘（如 E09 m+1深藍 → spec追加深藍）
+      var leftover = rest.substring(lastEnd).trim();
+      if (leftover && leftover.length <= 6 && leftover.indexOf(' ') === -1 && leftover.indexOf('+') === -1) {
+        pairs[pairs.length - 1].spec = (pairs[pairs.length - 1].spec + leftover).trim();
       }
+
+      pairs.forEach(function(p) {
+        if (p.qty > 0 && p.qty < 100) {
+          results.push({
+            nickname: nick || '未填',
+            productCode: productCode,
+            spec: p.spec,
+            qty: p.qty
+          });
+        }
+      });
     }
   }
   return results;
 }
 
+/* ── 批次匯入邏輯 ── */
 var _parsed = [];
 
 function onChatInput() {
@@ -338,7 +374,7 @@ function doImport() {
       document.getElementById('importResult').textContent = '成功匯入 ' + (r.count || list.length) + ' 筆訂單';
       goStep(3);
     } else {
-      showToast('匯入失敗：' + (r.message || ''), true);
+      showToast('匯入失敗：' + (r.message || '請確認試算表設定'), true);
     }
   });
 }
@@ -361,7 +397,7 @@ function goStep(n) {
   }
 }
 
-/* ══ 付款管理 ══ */
+/* ── 付款管理 ── */
 var _curFilter = 'all';
 
 function loadOrders(status) {
@@ -380,7 +416,7 @@ function loadOrders(status) {
       return '<tr>' +
         '<td style="font-family:monospace;font-size:.7rem;color:#aaa">' + esc(o.orderId) + '</td>' +
         '<td>' + esc(o.nickname) + '</td>' +
-        '<td>[' + esc(o.productCode) + '] ' + esc(o.productName) + (o.spec ? '<br><span style="font-size:.68rem;color:#aaa">'+esc(o.spec)+'</span>' : '') + '</td>' +
+        '<td>[' + esc(o.productCode) + '] ' + esc(o.productName||o.productCode) + (o.spec ? '<br><span style="font-size:.68rem;color:#aaa">'+esc(o.spec)+'</span>' : '') + '</td>' +
         '<td>NT$' + (o.subtotal||0).toLocaleString() + '</td>' +
         '<td><span class="badge s-' + esc(o.status) + '">' + esc(o.status) + '</span></td>' +
         '<td>' + ops + '</td>' +
@@ -390,7 +426,7 @@ function loadOrders(status) {
 }
 
 function filterOrders(status, btn) {
-  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('#tab-payment .filter-btn').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
   loadOrders(status);
 }
@@ -402,24 +438,87 @@ function setStatus(orderId, status) {
   });
 }
 
-/* ══ 檔口下單 ══ */
-function doStallOrder() {
-  var nick = document.getElementById('stallNick').value.trim();
-  var code = document.getElementById('stallCode').value.trim().toUpperCase();
-  var spec = document.getElementById('stallSpec').value.trim();
-  var qty  = parseInt(document.getElementById('stallQty').value) || 1;
-  if (!nick || !code) { showToast('請填寫暱稱與商品代號', true); return; }
-  gasCall('import', { orders: [{ nickname: nick, productCode: code, spec: spec, qty: qty }] }, function(r) {
-    if (r.success) {
-      showToast('訂單建立成功 ✓');
-      document.getElementById('stallNick').value = '';
-      document.getElementById('stallCode').value = '';
-      document.getElementById('stallSpec').value = '';
-      document.getElementById('stallQty').value  = '1';
-    } else {
-      showToast('建立失敗：' + (r.message||''), true);
+/* ── 叫貨彙整 ── */
+var _summaryFilter = 'all';
+var _allOrdersCache = [];
+
+function setSummaryFilter(f, btn) {
+  _summaryFilter = f;
+  document.querySelectorAll('#summaryFilters .filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderSummary(_allOrdersCache);
+}
+
+function loadSummary() {
+  document.getElementById('summaryContent').innerHTML = '<div class="empty">載入中…</div>';
+  gasCall('allOrders', { status: 'all' }, function(r) {
+    if (!r.success || !r.orders || !r.orders.length) {
+      document.getElementById('summaryContent').innerHTML = '<div class="empty">目前沒有訂單資料</div>';
+      return;
+    }
+    _allOrdersCache = r.orders;
+    renderSummary(r.orders);
+  });
+}
+
+function renderSummary(orders) {
+  // 依 filter 篩選
+  var filtered = orders;
+  if (_summaryFilter !== 'all') {
+    filtered = orders.filter(function(o){ return o.status === _summaryFilter; });
+  }
+
+  if (!filtered.length) {
+    document.getElementById('summaryContent').innerHTML = '<div class="empty">此篩選條件無訂單</div>';
+    return;
+  }
+
+  // 依商品代號 + 規格 彙整
+  var map = {};
+  filtered.forEach(function(o) {
+    var key = o.productCode + '@@' + (o.spec || '');
+    if (!map[key]) {
+      map[key] = {
+        productCode: o.productCode,
+        spec: o.spec || '',
+        qty: 0,
+        buyers: []
+      };
+    }
+    map[key].qty += (parseInt(o.qty) || 0);
+    if (o.nickname && map[key].buyers.indexOf(o.nickname) === -1) {
+      map[key].buyers.push(o.nickname);
     }
   });
+
+  // 排序：先按商品代號，再按規格
+  var rows = Object.values(map).sort(function(a, b) {
+    if (a.productCode < b.productCode) return -1;
+    if (a.productCode > b.productCode) return 1;
+    return a.spec < b.spec ? -1 : 1;
+  });
+
+  var totalQty = rows.reduce(function(s, r){ return s + r.qty; }, 0);
+
+  var html = '<div class="card" style="padding:0;overflow:hidden">' +
+    '<table class="summary-tbl">' +
+    '<thead><tr><th>款號</th><th>規格</th><th>件數</th><th>訂購人</th></tr></thead>' +
+    '<tbody>' +
+    rows.map(function(r) {
+      return '<tr>' +
+        '<td><span class="code-tag">' + esc(r.productCode) + '</span></td>' +
+        '<td>' + (r.spec ? esc(r.spec) : '<span style="color:#ccc">—</span>') + '</td>' +
+        '<td><span class="qty-badge">' + r.qty + '</span></td>' +
+        '<td style="font-size:.72rem;color:#888;max-width:200px">' + esc(r.buyers.join('、')) + '</td>' +
+      '</tr>';
+    }).join('') +
+    '</tbody></table></div>' +
+    '<div class="total-bar">' +
+    '<span>共 <strong>' + rows.length + '</strong> 款</span>' +
+    '<span>總計 <strong>' + totalQty + '</strong> 件</span>' +
+    '</div>';
+
+  document.getElementById('summaryContent').innerHTML = html;
 }
 </script>
 </body>
