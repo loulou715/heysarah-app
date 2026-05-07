@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HEYSARAH 後台管理</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://script.google.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -86,7 +89,7 @@
   <div class="tab" onclick="switchTab('summary')">📦 叫貨彙整</div>
 </div>
 
-<!-- ═══ 批次匯入 ═══ -->
+<!-- 批次匯入 -->
 <div id="tab-import" class="content">
   <div class="steps">
     <div class="step active" id="s1">1</div>
@@ -95,7 +98,6 @@
     <div class="step-line"></div>
     <div class="step" id="s3">3</div>
   </div>
-
   <div id="step1">
     <div class="card">
       <div class="card-title">
@@ -116,7 +118,6 @@
       </div>
     </div>
   </div>
-
   <div id="step2" style="display:none">
     <div class="card">
       <div class="card-title">
@@ -136,7 +137,6 @@
       </div>
     </div>
   </div>
-
   <div id="step3" style="display:none">
     <div class="card">
       <div class="success-box">
@@ -149,7 +149,7 @@
   </div>
 </div>
 
-<!-- ═══ 付款管理 ═══ -->
+<!-- 付款管理 -->
 <div id="tab-payment" class="content" style="display:none">
   <div class="filters">
     <button class="filter-btn active" onclick="filterOrders('all',this)">全部</button>
@@ -165,360 +165,225 @@
   </div>
 </div>
 
-<!-- ═══ 叫貨彙整 ═══ -->
+<!-- 叫貨彙整 -->
 <div id="tab-summary" class="content" style="display:none">
   <div class="card" style="margin-bottom:12px">
     <div class="card-title">
       <span>叫貨彙整</span>
       <button class="btn btn-ghost" style="padding:6px 14px;font-size:.74rem" onclick="loadSummary()">🔄 重新整理</button>
     </div>
-    <p style="font-size:.76rem;color:#aaa;margin-bottom:16px">依商品款號自動統計總件數，系統直接從訂單辨識，無需建立商品目錄</p>
+    <p style="font-size:.76rem;color:#aaa;margin-bottom:16px">依商品款號自動統計總件數，無需建立商品目錄</p>
     <div class="filters" id="summaryFilters">
       <button class="filter-btn active" onclick="setSummaryFilter('all',this)">全部訂單</button>
       <button class="filter-btn" onclick="setSummaryFilter('待確認',this)">待確認</button>
       <button class="filter-btn" onclick="setSummaryFilter('已付款',this)">已付款</button>
     </div>
   </div>
-
-  <div id="summaryContent">
-    <div class="empty">點上方「重新整理」載入叫貨清單</div>
-  </div>
+  <div id="summaryContent"><div class="empty">點上方「重新整理」載入叫貨清單</div></div>
 </div>
 
 <div id="toast" class="toast"></div>
 
 <script>
-var API = 'https://script.google.com/macros/s/AKfycbxAampl5u_AKoSlrpP7b3nXiVu-L9ZmmKslS-Qaa-ya_G0UwkUQCIdU8xUKMipu1-hCHw/exec';
+var API='https://script.google.com/macros/s/AKfycbxAampl5u_AKoSlrpP7b3nXiVu-L9ZmmKslS-Qaa-ya_G0UwkUQCIdU8xUKMipu1-hCHw/exec';
 
-/* ── 基礎工具 ── */
-function gasCall(action, params, onSuccess, onError) {
-  var qs = 'action=' + action;
-  for (var k in params) {
-    var v = params[k];
-    qs += '&' + k + '=' + encodeURIComponent(typeof v === 'object' ? JSON.stringify(v) : v);
-  }
-  fetch(API + '?' + qs)
-    .then(function(r){ return r.json(); })
-    .then(onSuccess)
-    .catch(onError || function(e){ showToast('連線失敗：' + e.message, true); });
+function gasCall(action,params,onSuccess,onError){
+  var qs='action='+action;
+  for(var k in params){var v=params[k];qs+='&'+k+'='+encodeURIComponent(typeof v==='object'?JSON.stringify(v):v);}
+  fetch(API+'?'+qs).then(function(r){return r.json();}).then(onSuccess)
+    .catch(onError||function(e){showToast('連線失敗：'+e.message,true);});
+}
+function showToast(msg,err){
+  var t=document.getElementById('toast');t.textContent=msg;
+  t.style.background=err?'#c53030':'#1a1a1a';t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},3000);
+}
+function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):''}
+
+function switchTab(tab){
+  document.getElementById('tab-import').style.display=tab==='import'?'block':'none';
+  document.getElementById('tab-payment').style.display=tab==='payment'?'block':'none';
+  document.getElementById('tab-summary').style.display=tab==='summary'?'block':'none';
+  var tabs=document.querySelectorAll('.tab');
+  tabs[0].classList.toggle('active',tab==='import');
+  tabs[1].classList.toggle('active',tab==='payment');
+  tabs[2].classList.toggle('active',tab==='summary');
+  if(tab==='payment')loadOrders('all');
+  if(tab==='summary')loadSummary();
 }
 
-function showToast(msg, err) {
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.background = err ? '#c53030' : '#1a1a1a';
-  t.classList.add('show');
-  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+/* 解析核心 */
+function normalize(t){
+  return t.replace(/[＋]/g,'+')
+    .replace(/[Ａ-Ｚ]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/[ａ-ｚ]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+    .replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFF10+48);})
+    .replace(/　/g,' ');
 }
-
-function esc(s) {
-  return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
-}
-
-/* ── 分頁切換 ── */
-function switchTab(tab) {
-  document.getElementById('tab-import').style.display  = tab==='import'  ? 'block' : 'none';
-  document.getElementById('tab-payment').style.display = tab==='payment' ? 'block' : 'none';
-  document.getElementById('tab-summary').style.display = tab==='summary' ? 'block' : 'none';
-  var tabs = document.querySelectorAll('.tab');
-  tabs[0].classList.toggle('active', tab==='import');
-  tabs[1].classList.toggle('active', tab==='payment');
-  tabs[2].classList.toggle('active', tab==='summary');
-  if (tab === 'payment') loadOrders('all');
-  if (tab === 'summary') loadSummary();
-}
-
-/* ══════════════════════════════════════
-   解析核心（強化版）
-   支援：
-   - HH:MM 暱稱 商品+規格+數量
-   - 一行多筆：E06 粉+1灰+1
-   - 數量後跟規格：E09 m+1深藍
-   - 無規格：E11 +1
-   - 自動跳過日期行、系統訊息、對話
-══════════════════════════════════════ */
-function normalize(t) {
-  return t
-    .replace(/[＋]/g, '+')
-    .replace(/[Ａ-Ｚ]/g, function(c){ return String.fromCharCode(c.charCodeAt(0)-0xFEE0); })
-    .replace(/[ａ-ｚ]/g, function(c){ return String.fromCharCode(c.charCodeAt(0)-0xFEE0); })
-    .replace(/[０-９]/g, function(c){ return String.fromCharCode(c.charCodeAt(0)-0xFF10+48); })
-    .replace(/　/g, ' ');
-}
-
-function shouldSkip(line) {
-  if (/^\d{4}[.\-\/]\d{1,2}[.\-\/]\d{1,2}/.test(line)) return true;  // 日期行
-  if (/已收回訊息/.test(line)) return true;                             // 系統訊息
-  if (/^管理員/.test(line)) return true;                                // 管理員訊息
+function shouldSkip(line){
+  if(/^\d{4}[.\-\/]\d{1,2}[.\-\/]\d{1,2}/.test(line))return true;
+  if(/已收回訊息/.test(line))return true;
+  if(/^管理員/.test(line))return true;
   return false;
 }
-
-function parseOrders(text) {
-  var lines = normalize(text).split('\n');
-  var results = [];
-  var lastNick = '';
-
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i].trim();
-    if (!line) continue;
-    if (shouldSkip(line)) continue;
-
-    var nick = '';
-    var orderPart = line;
-
-    // 格式：HH:MM 暱稱 訂單內容
-    var pm = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s+(\S+)\s+(.*)/);
-    if (pm) {
-      nick = pm[2];
-      orderPart = pm[3];
-      lastNick = nick;
-    } else {
-      if (!/[A-Za-z]\d{2}/.test(line)) {
-        // 無商品代號 → 當作暱稱行（長度合理且無網址）
-        if (line.length <= 20 && line.indexOf('http') === -1) {
-          lastNick = line;
-        }
+function parseOrders(text){
+  var lines=normalize(text).split('\n'),results=[],lastNick='';
+  for(var i=0;i<lines.length;i++){
+    var line=lines[i].trim();
+    if(!line||shouldSkip(line))continue;
+    var nick='',orderPart=line;
+    var pm=line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s+(\S+)\s+(.*)/);
+    if(pm){nick=pm[2];orderPart=pm[3];lastNick=nick;}
+    else{
+      if(!/[A-Za-z]\d{2}/.test(line)){
+        if(line.length<=20&&line.indexOf('http')===-1)lastNick=line;
         continue;
       }
-      nick = lastNick;
+      nick=lastNick;
     }
-
-    // 提取商品代號
-    var codeM = orderPart.match(/^([A-Za-z]{1,2}\d{2,3})\s*(.*)/);
-    if (!codeM) continue;
-
-    var productCode = codeM[1].toUpperCase();
-    var rest = codeM[2];
-
-    // 找出所有「規格+數量」組合（處理一行多筆）
-    var pairs = [];
-    var re = /([^+\d]*?)\s*\+(\d+)/g;
-    var m;
-    var lastEnd = 0;
-    while ((m = re.exec(rest)) !== null) {
-      pairs.push({ spec: m[1].trim(), qty: parseInt(m[2]) });
-      lastEnd = m.index + m[0].length;
+    var codeM=orderPart.match(/^([A-Za-z]{1,2}\d{2,3})\s*(.*)/);
+    if(!codeM)continue;
+    var productCode=codeM[1].toUpperCase(),rest=codeM[2];
+    var pairs=[],re=/([^+\d]*?)\s*\+(\d+)/g,m,lastEnd=0;
+    while((m=re.exec(rest))!==null){
+      pairs.push({spec:m[1].trim(),qty:parseInt(m[2])});
+      lastEnd=m.index+m[0].length;
     }
-
-    if (pairs.length > 0) {
-      // 處理 +數量 之後的規格殘餘（如 E09 m+1深藍 → spec追加深藍）
-      var leftover = rest.substring(lastEnd).trim();
-      if (leftover && leftover.length <= 6 && leftover.indexOf(' ') === -1 && leftover.indexOf('+') === -1) {
-        pairs[pairs.length - 1].spec = (pairs[pairs.length - 1].spec + leftover).trim();
-      }
-
-      pairs.forEach(function(p) {
-        if (p.qty > 0 && p.qty < 100) {
-          results.push({
-            nickname: nick || '未填',
-            productCode: productCode,
-            spec: p.spec,
-            qty: p.qty
-          });
-        }
+    if(pairs.length>0){
+      var leftover=rest.substring(lastEnd).trim();
+      if(leftover&&leftover.length<=6&&leftover.indexOf(' ')===-1&&leftover.indexOf('+')===-1)
+        pairs[pairs.length-1].spec=(pairs[pairs.length-1].spec+leftover).trim();
+      pairs.forEach(function(p){
+        if(p.qty>0&&p.qty<100)results.push({nickname:nick||'未填',productCode:productCode,spec:p.spec,qty:p.qty});
       });
     }
   }
   return results;
 }
 
-/* ── 批次匯入邏輯 ── */
-var _parsed = [];
-
-function onChatInput() {
-  var text = document.getElementById('chatInput').value;
-  _parsed = parseOrders(text);
-  var bar = document.getElementById('countBar');
-  var btn = document.getElementById('parseBtn');
-  if (_parsed.length > 0) {
-    bar.textContent = '✓ 偵測到 ' + _parsed.length + ' 筆訂單';
-    bar.style.display = 'block';
-    btn.disabled = false;
-  } else {
-    bar.style.display = 'none';
-    btn.disabled = true;
-  }
+var _parsed=[];
+function onChatInput(){
+  var text=document.getElementById('chatInput').value;
+  _parsed=parseOrders(text);
+  var bar=document.getElementById('countBar'),btn=document.getElementById('parseBtn');
+  if(_parsed.length>0){bar.textContent='✓ 偵測到 '+_parsed.length+' 筆訂單';bar.style.display='block';btn.disabled=false;}
+  else{bar.style.display='none';btn.disabled=true;}
 }
-
-function clearChat() {
-  document.getElementById('chatInput').value = '';
-  onChatInput();
-}
-
-function doParseStep() {
-  if (!_parsed.length) return;
-  var tbody = document.getElementById('previewBody');
-  tbody.innerHTML = _parsed.map(function(o, idx) {
-    return '<tr>' +
-      '<td><input value="' + esc(o.nickname) + '" oninput="_parsed['+idx+'].nickname=this.value"></td>' +
-      '<td><input value="' + esc(o.productCode) + '" style="width:65px;text-transform:uppercase" oninput="_parsed['+idx+'].productCode=this.value.toUpperCase()"></td>' +
-      '<td><input value="' + esc(o.spec) + '" oninput="_parsed['+idx+'].spec=this.value"></td>' +
-      '<td><input type="number" value="' + o.qty + '" style="width:55px" oninput="_parsed['+idx+'].qty=parseInt(this.value)||1"></td>' +
-      '<td><button class="row-del" onclick="delRow('+idx+')">✕</button></td>' +
+function clearChat(){document.getElementById('chatInput').value='';onChatInput();}
+function doParseStep(){
+  if(!_parsed.length)return;
+  var tbody=document.getElementById('previewBody');
+  tbody.innerHTML=_parsed.map(function(o,idx){
+    return '<tr>'+
+      '<td><input value="'+esc(o.nickname)+'" oninput="_parsed['+idx+'].nickname=this.value"></td>'+
+      '<td><input value="'+esc(o.productCode)+'" style="width:65px;text-transform:uppercase" oninput="_parsed['+idx+'].productCode=this.value.toUpperCase()"></td>'+
+      '<td><input value="'+esc(o.spec)+'" oninput="_parsed['+idx+'].spec=this.value"></td>'+
+      '<td><input type="number" value="'+o.qty+'" style="width:55px" oninput="_parsed['+idx+'].qty=parseInt(this.value)||1"></td>'+
+      '<td><button class="row-del" onclick="delRow('+idx+')">✕</button></td>'+
     '</tr>';
   }).join('');
-  document.getElementById('parseCount').textContent = '共 ' + _parsed.length + ' 筆';
+  document.getElementById('parseCount').textContent='共 '+_parsed.length+' 筆';
   goStep(2);
 }
-
-function delRow(idx) {
-  _parsed.splice(idx, 1);
-  doParseStep();
-}
-
-function doImport() {
-  var list = _parsed.filter(function(o){ return o.productCode && o.qty > 0; });
-  if (!list.length) { showToast('沒有可匯入的資料', true); return; }
-  gasCall('import', { orders: list }, function(r) {
-    if (r.success) {
-      document.getElementById('importResult').textContent = '成功匯入 ' + (r.count || list.length) + ' 筆訂單';
-      goStep(3);
-    } else {
-      showToast('匯入失敗：' + (r.message || '請確認試算表設定'), true);
-    }
+function delRow(idx){_parsed.splice(idx,1);doParseStep();}
+function doImport(){
+  var list=_parsed.filter(function(o){return o.productCode&&o.qty>0;});
+  if(!list.length){showToast('沒有可匯入的資料',true);return;}
+  gasCall('import',{orders:list},function(r){
+    if(r.success){document.getElementById('importResult').textContent='成功匯入 '+(r.count||list.length)+' 筆訂單';goStep(3);}
+    else showToast('匯入失敗：'+(r.message||'請確認試算表設定'),true);
   });
 }
-
-function resetImport() {
-  _parsed = [];
-  document.getElementById('chatInput').value = '';
-  document.getElementById('countBar').style.display = 'none';
-  document.getElementById('parseBtn').disabled = true;
-  goStep(1);
+function resetImport(){
+  _parsed=[];document.getElementById('chatInput').value='';
+  document.getElementById('countBar').style.display='none';
+  document.getElementById('parseBtn').disabled=true;goStep(1);
 }
-
-function goStep(n) {
-  document.getElementById('step1').style.display = n===1 ? 'block' : 'none';
-  document.getElementById('step2').style.display = n===2 ? 'block' : 'none';
-  document.getElementById('step3').style.display = n===3 ? 'block' : 'none';
-  for (var i = 1; i <= 3; i++) {
-    var el = document.getElementById('s'+i);
-    el.className = 'step' + (i < n ? ' done' : i === n ? ' active' : '');
+function goStep(n){
+  document.getElementById('step1').style.display=n===1?'block':'none';
+  document.getElementById('step2').style.display=n===2?'block':'none';
+  document.getElementById('step3').style.display=n===3?'block':'none';
+  for(var i=1;i<=3;i++){
+    var el=document.getElementById('s'+i);
+    el.className='step'+(i<n?' done':i===n?' active':'');
   }
 }
 
-/* ── 付款管理 ── */
-var _curFilter = 'all';
-
-function loadOrders(status) {
-  _curFilter = status;
-  var tbody = document.getElementById('paymentBody');
-  tbody.innerHTML = '<tr><td colspan="6"><div class="empty">載入中…</div></td></tr>';
-  gasCall('allOrders', { status: status }, function(r) {
-    if (!r.success || !r.orders || !r.orders.length) {
-      tbody.innerHTML = '<tr><td colspan="6"><div class="empty">沒有訂單資料</div></td></tr>';
-      return;
-    }
-    tbody.innerHTML = r.orders.map(function(o) {
-      var ops = '';
-      if (o.status === '待確認') ops = '<button class="btn-sm-success" onclick="setStatus(\''+esc(o.orderId)+'\',\'已付款\')">確認付款</button>';
-      if (o.status === '已付款')  ops = '<button class="btn-sm-ghost"   onclick="setStatus(\''+esc(o.orderId)+'\',\'已出貨\')">出貨</button>';
-      return '<tr>' +
-        '<td style="font-family:monospace;font-size:.7rem;color:#aaa">' + esc(o.orderId) + '</td>' +
-        '<td>' + esc(o.nickname) + '</td>' +
-        '<td>[' + esc(o.productCode) + '] ' + esc(o.productName||o.productCode) + (o.spec ? '<br><span style="font-size:.68rem;color:#aaa">'+esc(o.spec)+'</span>' : '') + '</td>' +
-        '<td>NT$' + (o.subtotal||0).toLocaleString() + '</td>' +
-        '<td><span class="badge s-' + esc(o.status) + '">' + esc(o.status) + '</span></td>' +
-        '<td>' + ops + '</td>' +
+/* 付款管理 */
+var _curFilter='all';
+function loadOrders(status){
+  _curFilter=status;
+  var tbody=document.getElementById('paymentBody');
+  tbody.innerHTML='<tr><td colspan="6"><div class="empty">載入中…</div></td></tr>';
+  gasCall('allOrders',{status:status},function(r){
+    if(!r.success||!r.orders||!r.orders.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty">沒有訂單資料</div></td></tr>';return;}
+    tbody.innerHTML=r.orders.map(function(o){
+      var ops='';
+      if(o.status==='待確認')ops='<button class="btn-sm-success" onclick="setStatus(\''+esc(o.orderId)+'\',\'已付款\')">確認付款</button>';
+      if(o.status==='已付款')ops='<button class="btn-sm-ghost" onclick="setStatus(\''+esc(o.orderId)+'\',\'已出貨\')">出貨</button>';
+      return '<tr>'+
+        '<td style="font-family:monospace;font-size:.7rem;color:#aaa">'+esc(o.orderId)+'</td>'+
+        '<td>'+esc(o.nickname)+'</td>'+
+        '<td>['+esc(o.productCode)+'] '+esc(o.productName||o.productCode)+(o.spec?'<br><span style="font-size:.68rem;color:#aaa">'+esc(o.spec)+'</span>':'')+'</td>'+
+        '<td>NT$'+Number(o.subtotal||0).toLocaleString()+'</td>'+
+        '<td><span class="badge s-'+esc(o.status)+'">'+esc(o.status)+'</span></td>'+
+        '<td>'+ops+'</td>'+
       '</tr>';
     }).join('');
   });
 }
-
-function filterOrders(status, btn) {
-  document.querySelectorAll('#tab-payment .filter-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  loadOrders(status);
+function filterOrders(status,btn){
+  document.querySelectorAll('#tab-payment .filter-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');loadOrders(status);
 }
-
-function setStatus(orderId, status) {
-  gasCall('updateStatus', { orderId: orderId, status: status }, function(r) {
-    if (r.success) { showToast('狀態已更新 ✓'); loadOrders(_curFilter); }
-    else showToast('更新失敗', true);
+function setStatus(orderId,status){
+  gasCall('updateStatus',{orderId:orderId,status:status},function(r){
+    if(r.success){showToast('狀態已更新 ✓');loadOrders(_curFilter);}
+    else showToast('更新失敗',true);
   });
 }
 
-/* ── 叫貨彙整 ── */
-var _summaryFilter = 'all';
-var _allOrdersCache = [];
-
-function setSummaryFilter(f, btn) {
-  _summaryFilter = f;
-  document.querySelectorAll('#summaryFilters .filter-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  renderSummary(_allOrdersCache);
+/* 叫貨彙整 */
+var _summaryFilter='all',_allOrdersCache=[];
+function setSummaryFilter(f,btn){
+  _summaryFilter=f;
+  document.querySelectorAll('#summaryFilters .filter-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');renderSummary(_allOrdersCache);
 }
-
-function loadSummary() {
-  document.getElementById('summaryContent').innerHTML = '<div class="empty">載入中…</div>';
-  gasCall('allOrders', { status: 'all' }, function(r) {
-    if (!r.success || !r.orders || !r.orders.length) {
-      document.getElementById('summaryContent').innerHTML = '<div class="empty">目前沒有訂單資料</div>';
-      return;
-    }
-    _allOrdersCache = r.orders;
-    renderSummary(r.orders);
+function loadSummary(){
+  document.getElementById('summaryContent').innerHTML='<div class="empty">載入中…</div>';
+  gasCall('allOrders',{status:'all'},function(r){
+    if(!r.success||!r.orders||!r.orders.length){document.getElementById('summaryContent').innerHTML='<div class="empty">目前沒有訂單資料</div>';return;}
+    _allOrdersCache=r.orders;renderSummary(r.orders);
   });
 }
-
-function renderSummary(orders) {
-  // 依 filter 篩選
-  var filtered = orders;
-  if (_summaryFilter !== 'all') {
-    filtered = orders.filter(function(o){ return o.status === _summaryFilter; });
-  }
-
-  if (!filtered.length) {
-    document.getElementById('summaryContent').innerHTML = '<div class="empty">此篩選條件無訂單</div>';
-    return;
-  }
-
-  // 依商品代號 + 規格 彙整
-  var map = {};
-  filtered.forEach(function(o) {
-    var key = o.productCode + '@@' + (o.spec || '');
-    if (!map[key]) {
-      map[key] = {
-        productCode: o.productCode,
-        spec: o.spec || '',
-        qty: 0,
-        buyers: []
-      };
-    }
-    map[key].qty += (parseInt(o.qty) || 0);
-    if (o.nickname && map[key].buyers.indexOf(o.nickname) === -1) {
-      map[key].buyers.push(o.nickname);
-    }
+function renderSummary(orders){
+  var filtered=_summaryFilter==='all'?orders:orders.filter(function(o){return o.status===_summaryFilter;});
+  if(!filtered.length){document.getElementById('summaryContent').innerHTML='<div class="empty">此篩選條件無訂單</div>';return;}
+  var map={};
+  filtered.forEach(function(o){
+    var key=o.productCode+'@@'+(o.spec||'');
+    if(!map[key])map[key]={productCode:o.productCode,spec:o.spec||'',qty:0,buyers:[]};
+    map[key].qty+=(parseInt(o.qty)||0);
+    if(o.nickname&&map[key].buyers.indexOf(o.nickname)===-1)map[key].buyers.push(o.nickname);
   });
-
-  // 排序：先按商品代號，再按規格
-  var rows = Object.values(map).sort(function(a, b) {
-    if (a.productCode < b.productCode) return -1;
-    if (a.productCode > b.productCode) return 1;
-    return a.spec < b.spec ? -1 : 1;
+  var rows=Object.values(map).sort(function(a,b){
+    return a.productCode<b.productCode?-1:a.productCode>b.productCode?1:a.spec<b.spec?-1:1;
   });
-
-  var totalQty = rows.reduce(function(s, r){ return s + r.qty; }, 0);
-
-  var html = '<div class="card" style="padding:0;overflow:hidden">' +
-    '<table class="summary-tbl">' +
-    '<thead><tr><th>款號</th><th>規格</th><th>件數</th><th>訂購人</th></tr></thead>' +
-    '<tbody>' +
-    rows.map(function(r) {
-      return '<tr>' +
-        '<td><span class="code-tag">' + esc(r.productCode) + '</span></td>' +
-        '<td>' + (r.spec ? esc(r.spec) : '<span style="color:#ccc">—</span>') + '</td>' +
-        '<td><span class="qty-badge">' + r.qty + '</span></td>' +
-        '<td style="font-size:.72rem;color:#888;max-width:200px">' + esc(r.buyers.join('、')) + '</td>' +
+  var totalQty=rows.reduce(function(s,r){return s+r.qty;},0);
+  document.getElementById('summaryContent').innerHTML=
+    '<div class="card" style="padding:0;overflow:hidden">'+
+    '<table class="summary-tbl"><thead><tr><th>款號</th><th>規格</th><th>件數</th><th>訂購人</th></tr></thead><tbody>'+
+    rows.map(function(r){
+      return '<tr>'+
+        '<td><span class="code-tag">'+esc(r.productCode)+'</span></td>'+
+        '<td>'+(r.spec?esc(r.spec):'<span style="color:#ccc">—</span>')+'</td>'+
+        '<td><span class="qty-badge">'+r.qty+'</span></td>'+
+        '<td style="font-size:.72rem;color:#888">'+esc(r.buyers.join('、'))+'</td>'+
       '</tr>';
-    }).join('') +
-    '</tbody></table></div>' +
-    '<div class="total-bar">' +
-    '<span>共 <strong>' + rows.length + '</strong> 款</span>' +
-    '<span>總計 <strong>' + totalQty + '</strong> 件</span>' +
-    '</div>';
-
-  document.getElementById('summaryContent').innerHTML = html;
+    }).join('')+
+    '</tbody></table></div>'+
+    '<div class="total-bar"><span>共 <strong>'+rows.length+'</strong> 款</span><span>總計 <strong>'+totalQty+'</strong> 件</span></div>';
 }
 </script>
 </body>
