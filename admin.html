@@ -28,19 +28,20 @@
     td { padding:12px; border-bottom:1px solid #f9f9f9; color:#333; vertical-align:middle; }
     tr:last-child td { border-bottom:none; }
     .badge { font-size:.7rem; padding:3px 10px; border-radius:100px; font-weight:500; display:inline-block; }
-    .badge-pending,.badge-待確認 { background:#fff3cd; color:#856404; }
-    .badge-paid,.badge-已付款 { background:#d1e7dd; color:#0a3622; }
-    .badge-shipped,.badge-已出貨 { background:#cfe2ff; color:#084298; }
-    .badge-cancel,.badge-取消 { background:#f8d7da; color:#842029; }
+    .badge-待確認 { background:#fff3cd; color:#856404; }
+    .badge-已付款 { background:#d1e7dd; color:#0a3622; }
+    .badge-已出貨 { background:#cfe2ff; color:#084298; }
+    .badge-取消 { background:#f8d7da; color:#842029; }
     .btn { padding:8px 18px; border-radius:10px; border:none; cursor:pointer; font-size:.82rem; font-family:inherit; }
     .btn-dark { background:var(--dark); color:white; }
     .btn-gold { background:var(--gold); color:white; }
     .btn-red { background:#dc3545; color:white; }
-    .btn-sm { padding:4px 12px; font-size:.75rem; border-radius:8px; }
-    .btn:disabled { opacity:.5; cursor:not-allowed; }
+    .btn-outline { background:transparent; color:#aaa; border:1px solid #ddd; }
+    .btn-sm { padding:4px 10px; font-size:.73rem; border-radius:7px; }
+    .btn:disabled { opacity:.4; cursor:not-allowed; }
     textarea { width:100%; border:1.5px solid #eee; border-radius:12px; padding:14px; font-size:.88rem; font-family:inherit; resize:vertical; outline:none; }
     textarea:focus { border-color:var(--gold); }
-    input { border:1.5px solid #eee; border-radius:10px; padding:10px 14px; font-size:.88rem; font-family:inherit; outline:none; }
+    input { border:1.5px solid #eee; border-radius:10px; padding:10px 14px; font-size:.88rem; font-family:inherit; outline:none; box-sizing:border-box; }
     input:focus { border-color:var(--gold); }
     .import-row { display:flex; gap:10px; margin-top:12px; align-items:center; }
     .import-row input { flex:1; }
@@ -54,11 +55,16 @@
     .detect-area { margin-top:10px; min-height:20px; }
     .detect-chip { display:inline-block; background:#e8f5e9; color:#2e7d32; border-radius:20px; padding:4px 12px; font-size:.76rem; margin:3px; }
     .price-gold { color:var(--gold); font-weight:500; }
+    .toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+    .toolbar-right { display:flex; gap:8px; }
+    .del-selected { display:none; }
+    .row-cb { width:16px; height:16px; cursor:pointer; }
+    tr.selected td { background:#fff5f5; }
   </style>
 </head>
 <body>
 <div class="sidebar">
-  <div class="sidebar-logo">HEYSARAH <span>ADMIN v4.1</span></div>
+  <div class="sidebar-logo">HEYSARAH <span>ADMIN v4.2</span></div>
   <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="icon">📊</span>總覽</div>
   <div class="nav-item" onclick="showPage('orders',this)"><span class="icon">📋</span>訂單管理</div>
   <div class="nav-item" onclick="showPage('import',this)"><span class="icon">📥</span>批次匯入</div>
@@ -67,6 +73,8 @@
   <div class="nav-item" onclick="showPage('products',this)"><span class="icon">🏷️</span>商品目錄</div>
 </div>
 <div class="main">
+
+  <!-- 總覽 -->
   <div id="page-dashboard">
     <div class="page-title">📊 總覽</div>
     <div class="stats">
@@ -80,19 +88,31 @@
       <tbody id="tb-recent"></tbody></table>
     </div>
   </div>
+
+  <!-- 訂單管理 -->
   <div id="page-orders" class="hidden">
     <div class="page-title">📋 訂單管理</div>
-    <div class="tabs">
-      <button class="tab active" onclick="filterOrders('all',this)">全部</button>
-      <button class="tab" onclick="filterOrders('待確認',this)">待確認</button>
-      <button class="tab" onclick="filterOrders('已付款',this)">已付款</button>
-      <button class="tab" onclick="filterOrders('已出貨',this)">已出貨</button>
+    <div class="toolbar">
+      <div class="tabs" style="margin-bottom:0">
+        <button class="tab active" onclick="filterOrders('all',this)">全部</button>
+        <button class="tab" onclick="filterOrders('待確認',this)">待確認</button>
+        <button class="tab" onclick="filterOrders('已付款',this)">已付款</button>
+        <button class="tab" onclick="filterOrders('已出貨',this)">已出貨</button>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-sm btn-red del-selected" id="btn-del-orders" onclick="deleteSelectedOrders()">🗑 刪除勾選</button>
+        <button class="btn btn-sm btn-outline" onclick="toggleSelectAll('orders-cb')">全選</button>
+      </div>
     </div>
     <div class="card">
-      <table><thead><tr><th>訂單編號</th><th>名稱</th><th>商品</th><th>規格</th><th>數量</th><th>金額</th><th>狀態</th><th>操作</th></tr></thead>
-      <tbody id="tb-orders"></tbody></table>
+      <table>
+        <thead><tr><th style="width:32px"><input type="checkbox" class="row-cb" onchange="toggleAll('orders-cb',this)"></th><th>訂單編號</th><th>名稱</th><th>商品</th><th>規格</th><th>數量</th><th>金額</th><th>狀態</th><th>操作</th></tr></thead>
+        <tbody id="tb-orders"></tbody>
+      </table>
     </div>
   </div>
+
+  <!-- 批次匯入 -->
   <div id="page-import" class="hidden">
     <div class="page-title">📥 批次匯入訂單</div>
     <div class="card">
@@ -111,30 +131,50 @@
       <tbody id="tb-preview"></tbody></table>
     </div>
   </div>
+
+  <!-- 付款管理 -->
   <div id="page-payment" class="hidden">
     <div class="page-title">💳 付款管理</div>
-    <div class="card">
-      <div class="card-title" style="display:flex;justify-content:space-between">
-        <span>待確認訂單</span>
+    <div class="toolbar">
+      <span style="font-size:.85rem;color:#999">待確認訂單</span>
+      <div class="toolbar-right">
+        <button class="btn btn-sm btn-red del-selected" id="btn-del-payment" onclick="deleteSelectedPayment()">🗑 刪除勾選</button>
+        <button class="btn btn-sm btn-outline" onclick="toggleSelectAll('payment-cb')">全選</button>
         <button class="btn btn-sm btn-dark" onclick="loadPayment()">重新整理</button>
       </div>
-      <table><thead><tr><th>訂單編號</th><th>名稱</th><th>商品</th><th>規格</th><th>數量</th><th>金額</th><th>狀態</th><th>操作</th></tr></thead>
-      <tbody id="tb-payment"></tbody></table>
-    </div>
-  </div>
-  <div id="page-summary" class="hidden">
-    <div class="page-title">📦 叫貨彙整</div>
-    <div class="tabs">
-      <button class="tab active" onclick="loadSummary('all',this)">全部有效</button>
-      <button class="tab" onclick="loadSummary('pending',this)">待確認</button>
-      <button class="tab" onclick="loadSummary('paid',this)">已付款</button>
     </div>
     <div class="card">
-      <table><thead><tr><th>商品編號</th><th>品名</th><th>規格</th><th>總數量</th><th>筆數</th></tr></thead>
-      <tbody id="tb-summary"></tbody></table>
+      <table>
+        <thead><tr><th style="width:32px"><input type="checkbox" class="row-cb" onchange="toggleAll('payment-cb',this)"></th><th>訂單編號</th><th>名稱</th><th>商品</th><th>規格</th><th>數量</th><th>金額</th><th>狀態</th><th>操作</th></tr></thead>
+        <tbody id="tb-payment"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 叫貨彙整 -->
+  <div id="page-summary" class="hidden">
+    <div class="page-title">📦 叫貨彙整</div>
+    <div class="toolbar">
+      <div class="tabs" style="margin-bottom:0">
+        <button class="tab active" onclick="loadSummary('all',this)">全部有效</button>
+        <button class="tab" onclick="loadSummary('pending',this)">待確認</button>
+        <button class="tab" onclick="loadSummary('paid',this)">已付款</button>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-sm btn-red del-selected" id="btn-del-summary" onclick="deleteSelectedSummaryOrders()">🗑 刪除該款訂單</button>
+        <button class="btn btn-sm btn-outline" onclick="toggleSelectAll('summary-cb')">全選</button>
+      </div>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th style="width:32px"><input type="checkbox" class="row-cb" onchange="toggleAll('summary-cb',this)"></th><th>商品編號</th><th>品名</th><th>規格</th><th>總數量</th><th>筆數</th></tr></thead>
+        <tbody id="tb-summary"></tbody>
+      </table>
       <div id="summary-total" style="text-align:right;margin-top:12px;font-size:.85rem;color:#999;"></div>
     </div>
   </div>
+
+  <!-- 商品目錄 -->
   <div id="page-products" class="hidden">
     <div class="page-title">🏷️ 商品目錄</div>
     <div class="card">
@@ -158,10 +198,11 @@
       <div id="products-empty" style="text-align:center;padding:32px;color:#bbb;font-size:.88rem;display:none">尚無商品資料</div>
     </div>
   </div>
+
 </div>
 <script>
 const API="https://script.google.com/macros/s/AKfycbxAampl5u_AKoSlrpP7b3nXiVu-L9ZmmKslS-Qaa-ya_G0UwkUQCIdU8xUKMipu1-hCHw/exec";
-let allOrders=[],productCache={};
+let allOrders=[],productCache={},summaryOrders=[];
 
 async function gasCall(action,params={}){
   const qs=Object.entries({action,...params}).map(([k,v])=>k+"="+encodeURIComponent(v)).join("&");
@@ -182,6 +223,61 @@ function showPage(name,el){
   if(name==="products")loadProducts();
 }
 
+// ── 勾選刪除工具 ──
+function toggleAll(cls,masterCb){
+  document.querySelectorAll("."+cls).forEach(cb=>{cb.checked=masterCb.checked;cb.closest("tr").classList.toggle("selected",masterCb.checked);});
+  updateDelBtn();
+}
+function onRowCb(cb,btnId){
+  cb.closest("tr").classList.toggle("selected",cb.checked);
+  updateDelBtn();
+}
+function updateDelBtn(){
+  document.querySelectorAll(".del-selected").forEach(btn=>{
+    const section=btn.id.replace("btn-del-","");
+    const map={orders:"orders-cb",payment:"payment-cb",summary:"summary-cb"};
+    const cls=map[section];
+    const count=cls?document.querySelectorAll("."+cls+":checked").length:0;
+    btn.style.display=count>0?"inline-block":"none";
+    btn.textContent="🗑 刪除 "+count+" 筆";
+  });
+}
+function toggleSelectAll(cls){
+  const cbs=document.querySelectorAll("."+cls);
+  const allChecked=[...cbs].every(c=>c.checked);
+  cbs.forEach(cb=>{cb.checked=!allChecked;cb.closest("tr").classList.toggle("selected",!allChecked);});
+  updateDelBtn();
+}
+function getCheckedIds(cls){
+  return [...document.querySelectorAll("."+cls+":checked")].map(cb=>cb.dataset.id);
+}
+
+async function deleteSelectedOrders(){
+  const ids=getCheckedIds("orders-cb");
+  if(!ids.length||!confirm("確定刪除這 "+ids.length+" 筆訂單？"))return;
+  const r=await gasCall("deleteOrders",{orderIds:JSON.stringify(ids)});
+  if(r.success){loadOrders("all");}else{alert("刪除失敗："+r.message);}
+}
+async function deleteSelectedPayment(){
+  const ids=getCheckedIds("payment-cb");
+  if(!ids.length||!confirm("確定刪除這 "+ids.length+" 筆訂單？"))return;
+  const r=await gasCall("deleteOrders",{orderIds:JSON.stringify(ids)});
+  if(r.success){loadPayment();}else{alert("刪除失敗："+r.message);}
+}
+async function deleteSelectedSummaryOrders(){
+  const keys=getCheckedIds("summary-cb");
+  if(!keys.length||!confirm("確定刪除這 "+keys.length+" 款的所有相關訂單？"))return;
+  // 找出對應的 orderId
+  const toDelete=summaryOrders.filter(o=>{
+    const k=o.productCode+"||"+(o.spec||"");
+    return keys.includes(k);
+  }).map(o=>o.orderId);
+  if(!toDelete.length){alert("找不到對應訂單");return;}
+  const r=await gasCall("deleteOrders",{orderIds:JSON.stringify(toDelete)});
+  if(r.success){loadSummary(currentSummaryFilter);}else{alert("刪除失敗："+r.message);}
+}
+
+// ── normalize ──
 function normalize(t){
   return t.replace(/[Ａ-Ｚ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
     .replace(/[ａ-ｚ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
@@ -189,44 +285,27 @@ function normalize(t){
     .replace(/＋/g,"+").replace(/　/g," ");
 }
 
+// ── 偵測商品 ──
 function parseProductsFromText(text){
   const lines=normalize(text).split("\n");
   const found=[],seen={};
   function findAbove(idx){
     for(let j=idx;j>=Math.max(0,idx-20);j--){
-      let line=lines[j].trim();
-      if(!line)continue;
-      const tm=line.match(/^\d{1,2}:\d{2}(?::\d{2})?\s+\S+\s+(.*)/);
-      if(tm)line=tm[1].trim();
-      line=line.replace(/^[^\w\u4e00-\u9fffA-Za-z]+/,"").trim();
+      let line=lines[j].trim();if(!line)continue;
+      const tm=line.match(/^\d{1,2}:\d{2}(?::\d{2})?\s+\S+\s+(.*)/);if(tm)line=tm[1].trim();
+      line=line.replace(/^[^\w一-鿿A-Za-z]+/,"").trim();
       const cm=line.match(/^([A-Za-z]\d{2,3})\s+(.{1,30})/);
-      if(cm){
-        const code=cm[1].toUpperCase();
-        const name=cm[2].trim().replace(/\s{2,}/g," ").substring(0,20).trim();
-        if(name.length>=1)return{code,name};
-      }
+      if(cm){const code=cm[1].toUpperCase();const name=cm[2].trim().replace(/\s{2,}/g," ").substring(0,20).trim();if(name.length>=1)return{code,name};}
     }
     return null;
   }
   for(let i=0;i<lines.length;i++){
-    const line=lines[i].trim();
-    if(!line)continue;
+    const line=lines[i].trim();if(!line)continue;
     let price=0,salePrice=0;
     const m1=line.match(/\$\s*(\d{3,5})[^\d$\n]*連線優惠[^\d$\n]*\$\s*(\d{3,5})/);
     if(m1){price=parseInt(m1[1]);salePrice=parseInt(m1[2]);}
-    if(!price){
-      const m2=line.match(/連線優惠\s*\$\s*(\d{3,5})/);
-      if(m2){
-        salePrice=parseInt(m2[1]);
-        const m2p=line.match(/\$\s*(\d{3,5})[^\d]*連線優惠/);
-        if(m2p){price=parseInt(m2p[1]);}
-        else{for(let k=i-1;k>=Math.max(0,i-3);k--){const mk=lines[k].trim().match(/\$\s*(\d{3,5})/);if(mk){price=parseInt(mk[1]);break;}}}
-      }
-    }
-    if(!price){
-      const m3=line.match(/^\s*(?:定價)?\s*\$\s*(\d{3,5})\s*[\/\\]?\s*$/);
-      if(m3){for(let n=i+1;n<=Math.min(i+2,lines.length-1);n++){const m3n=lines[n].trim().match(/連線優惠\s*\$\s*(\d{3,5})/);if(m3n){price=parseInt(m3[1]);salePrice=parseInt(m3n[1]);break;}}}
-    }
+    if(!price){const m2=line.match(/連線優惠\s*\$\s*(\d{3,5})/);if(m2){salePrice=parseInt(m2[1]);const m2p=line.match(/\$\s*(\d{3,5})[^\d]*連線優惠/);if(m2p){price=parseInt(m2p[1]);}else{for(let k=i-1;k>=Math.max(0,i-3);k--){const mk=lines[k].trim().match(/\$\s*(\d{3,5})/);if(mk){price=parseInt(mk[1]);break;}}}}}
+    if(!price){const m3=line.match(/^\s*(?:定價)?\s*\$\s*(\d{3,5})\s*[\/\\]?\s*$/);if(m3){for(let n=i+1;n<=Math.min(i+2,lines.length-1);n++){const m3n=lines[n].trim().match(/連線優惠\s*\$\s*(\d{3,5})/);if(m3n){price=parseInt(m3[1]);salePrice=parseInt(m3n[1]);break;}}}}
     if(!price||!salePrice||salePrice>=price)continue;
     const prod=findAbove(i-1);
     if(prod&&!seen[prod.code]){seen[prod.code]=true;found.push({code:prod.code,name:prod.name,price,salePrice,note:""});}
@@ -234,73 +313,59 @@ function parseProductsFromText(text){
   return found;
 }
 
+// ── 解析訂單 ──
 function parseOrdersFromText(text,defaultNick){
-  const lines=normalize(text).split("\n");
-  const orders=[];
+  const lines=normalize(text).split("\n");const orders=[];
   const lineRe=/^\d{1,2}:\d{2}(?::\d{2})?\s+(\S+)\s+(.*)/;
   const orderRe=/([A-Za-z]\d{2,3})\s*([^+\n]*?)\s*\+\s*(\d+)/gi;
   for(const raw of lines){
-    const line=raw.trim();
-    if(!line)continue;
-    const lm=line.match(lineRe);
-    const msg=lm?lm[2].trim():line;
-    const nick=lm?lm[1]:null;
+    const line=raw.trim();if(!line)continue;
+    const lm=line.match(lineRe);const msg=lm?lm[2].trim():line;const nick=lm?lm[1]:null;
     if(/連線優惠|\$\d{3,5}/.test(msg))continue;
     if(/^EX:|^例如|^範例|^注意|^說明/.test(msg))continue;
     let om;orderRe.lastIndex=0;
     while((om=orderRe.exec(msg))!==null){
-      const code=om[1].toUpperCase();
-      const spec=om[2].trim().replace(/^[\/\-\s]+|[\/\-\s]+$/g,"").trim();
-      const qty=parseInt(om[3]);
-      const nickname=defaultNick||nick||"後台匯入";
-      const info=productCache[code];
-      const unitPrice=info?(info.salePrice||info.price||0):0;
+      const code=om[1].toUpperCase();const spec=om[2].trim().replace(/^[\/\-\s]+|[\/\-\s]+$/g,"").trim();
+      const qty=parseInt(om[3]);const nickname=defaultNick||nick||"後台匯入";
+      const info=productCache[code];const unitPrice=info?(info.salePrice||info.price||0):0;
       orders.push({productCode:code,spec,qty,nickname,unitPrice,subtotal:unitPrice*qty});
     }
   }
   return orders;
 }
 
+// ── 批次匯入預覽 ──
 function previewImport(){
   const text=document.getElementById("importText").value;
-  const detectEl=document.getElementById("detect-products");
-  const previewCard=document.getElementById("preview-card");
+  const detectEl=document.getElementById("detect-products");const previewCard=document.getElementById("preview-card");
   if(!text.trim()){detectEl.innerHTML="";previewCard.style.display="none";return;}
   const products=parseProductsFromText(text);
-  if(products.length>0){
-    products.forEach(p=>{productCache[p.code]=p;});
-    detectEl.innerHTML="🔍 偵測到商品："+products.map(p=>`<span class="detect-chip">${p.code} ${p.name||""} $${p.price}→連線$${p.salePrice}</span>`).join("");
-  }else{detectEl.innerHTML="";}
+  if(products.length>0){products.forEach(p=>{productCache[p.code]=p;});detectEl.innerHTML="🔍 偵測到商品："+products.map(p=>`<span class="detect-chip">${p.code} ${p.name||""} $${p.price}→連線$${p.salePrice}</span>`).join("");}
+  else{detectEl.innerHTML="";}
   const nick=document.getElementById("importNickname").value.trim();
   const orders=parseOrdersFromText(text,nick);
-  if(orders.length>0){
-    previewCard.style.display="block";
-    document.getElementById("tb-preview").innerHTML=orders.map(o=>`<tr><td><b>${o.productCode}</b></td><td>${o.spec||"—"}</td><td>${o.qty}</td><td>${o.unitPrice?"NT$"+o.unitPrice.toLocaleString():"<span style='color:#bbb'>待查</span>"}</td><td>${o.subtotal?"NT$"+o.subtotal.toLocaleString():"—"}</td><td style="color:#999">${o.nickname}</td></tr>`).join("");
-  }else{previewCard.style.display="none";}
+  if(orders.length>0){previewCard.style.display="block";document.getElementById("tb-preview").innerHTML=orders.map(o=>`<tr><td><b>${o.productCode}</b></td><td>${o.spec||"—"}</td><td>${o.qty}</td><td>${o.unitPrice?"NT$"+o.unitPrice.toLocaleString():"<span style='color:#bbb'>待查</span>"}</td><td>${o.subtotal?"NT$"+o.subtotal.toLocaleString():"—"}</td><td style="color:#999">${o.nickname}</td></tr>`).join("");}
+  else{previewCard.style.display="none";}
 }
 
+// ── 執行匯入 ──
 async function doImport(){
   const text=document.getElementById("importText").value.trim();
   const nickname=document.getElementById("importNickname").value.trim();
   const el=document.getElementById("import-result");
   if(!text){el.textContent="請貼上訊息";return;}
   el.textContent="處理中⋯";
-  const products=parseProductsFromText(text);
-  let savedMsg="";
-  if(products.length>0){
-    try{const pr=await gasCall("saveProducts",{products:JSON.stringify(products)});products.forEach(p=>{productCache[p.code]=p;});savedMsg="自動建立 "+(pr.saved||products.length)+" 項商品，";}catch(e){}
-  }
+  const products=parseProductsFromText(text);let savedMsg="";
+  if(products.length>0){try{const pr=await gasCall("saveProducts",{products:JSON.stringify(products)});products.forEach(p=>{productCache[p.code]=p;});savedMsg="自動建立 "+(pr.saved||products.length)+" 項商品，";}catch(e){}}
   const orders=parseOrdersFromText(text,nickname);
   if(!orders.length){el.textContent="❌ 未偵測到訂單，請確認格式（如：A01黑L+1）";return;}
-  try{
-    const data=await gasCall("import",{orders:JSON.stringify(orders)});
-    el.innerHTML=data.success?"✅ "+savedMsg+"成功匯入 "+data.count+" 筆訂單":"❌ "+data.message;
-  }catch(e){el.textContent="❌ 網路錯誤："+e.message;}
+  try{const data=await gasCall("import",{orders:JSON.stringify(orders)});el.innerHTML=data.success?"✅ "+savedMsg+"成功匯入 "+data.count+" 筆訂單":"❌ "+data.message;}
+  catch(e){el.textContent="❌ 網路錯誤："+e.message;}
 }
 
+// ── 總覽 ──
 async function loadDashboard(){
-  const data=await gasCall("allOrders",{status:"all"});
-  if(!data.success)return;
+  const data=await gasCall("allOrders",{status:"all"});if(!data.success)return;
   const orders=data.orders;
   document.getElementById("stat-total").textContent=orders.length;
   document.getElementById("stat-pending").textContent=orders.filter(o=>o.status==="待確認").length;
@@ -308,47 +373,114 @@ async function loadDashboard(){
   document.getElementById("tb-recent").innerHTML=orders.slice(0,8).map(o=>`<tr><td style="color:#999;font-size:.78rem">${(o.timestamp||"").substring(5,16)}</td><td>${o.nickname}</td><td>[${o.productCode}] ${o.productName||""}</td><td>${o.qty}</td><td class="price-gold">NT$${(o.subtotal||0).toLocaleString()}</td><td><span class="badge badge-${o.status}">${o.status}</span></td></tr>`).join("");
 }
 
+// ── 訂單管理 ──
 async function loadOrders(status){
-  const data=await gasCall("allOrders",{status});
-  if(!data.success)return;
+  const data=await gasCall("allOrders",{status});if(!data.success)return;
   allOrders=data.orders;renderOrders(allOrders);
 }
-
 function filterOrders(status,el){
-  document.querySelectorAll("#page-orders .tab").forEach(t=>t.classList.remove("active"));
-  el.classList.add("active");
+  document.querySelectorAll("#page-orders .tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");
   renderOrders(status==="all"?allOrders:allOrders.filter(o=>o.status===status));
 }
-
 function renderOrders(orders){
-  document.getElementById("tb-orders").innerHTML=orders.map(o=>`<tr><td style="font-size:.72rem;color:#aaa">${o.orderId}</td><td>${o.nickname}</td><td>[${o.productCode}] ${o.productName||""}</td><td>${o.spec||"—"}</td><td>${o.qty}</td><td class="price-gold">NT$${(o.subtotal||0).toLocaleString()}</td><td><span class="badge badge-${o.status}">${o.status}</span></td><td><select onchange="updateStatus('${o.orderId}',this.value)" style="font-size:.75rem;padding:3px 6px;border-radius:6px;border:1px solid #eee">${["待確認","已付款","已出貨","取消"].map(s=>`<option ${s===o.status?"selected":""}>${s}</option>`).join("")}</select></td></tr>`).join("");
+  document.getElementById("tb-orders").innerHTML=orders.map(o=>`
+    <tr>
+      <td><input type="checkbox" class="row-cb orders-cb" data-id="${o.orderId}" onchange="onRowCb(this,'btn-del-orders')"></td>
+      <td style="font-size:.72rem;color:#aaa">${o.orderId}</td>
+      <td>${o.nickname}</td>
+      <td>[${o.productCode}] ${o.productName||""}</td>
+      <td>${o.spec||"—"}</td>
+      <td>${o.qty}</td>
+      <td class="price-gold">NT$${(o.subtotal||0).toLocaleString()}</td>
+      <td><span class="badge badge-${o.status}">${o.status}</span></td>
+      <td style="display:flex;gap:6px;align-items:center">
+        <select onchange="updateStatus('${o.orderId}',this.value)" style="font-size:.75rem;padding:3px 6px;border-radius:6px;border:1px solid #eee">
+          ${["待確認","已付款","已出貨","取消"].map(s=>`<option ${s===o.status?"selected":""}>${s}</option>`).join("")}
+        </select>
+        <button class="btn btn-sm btn-red" onclick="deleteSingleOrder('${o.orderId}',this)">刪除</button>
+      </td>
+    </tr>`).join("");
+  updateDelBtn();
 }
-
 async function updateStatus(orderId,status){await gasCall("updateStatus",{orderId,status});}
-
-async function loadPayment(){
-  const data=await gasCall("allOrders",{status:"all"});
-  if(!data.success)return;
-  const pending=data.orders.filter(o=>o.status==="待確認");
-  document.getElementById("tb-payment").innerHTML=pending.length===0?"<tr><td colspan='8' style='text-align:center;color:#bbb;padding:24px'>目前無待確認訂單</td></tr>":pending.map(o=>`<tr><td style="font-size:.72rem;color:#aaa">${o.orderId}</td><td>${o.nickname}</td><td>[${o.productCode}] ${o.productName||""}</td><td>${o.spec||"—"}</td><td>${o.qty}</td><td class="price-gold">NT$${(o.subtotal||0).toLocaleString()}</td><td><span class="badge badge-${o.status}" id="st-${o.orderId}">${o.status}</span></td><td><button class="btn btn-sm btn-dark" onclick="markPaid('${o.orderId}',this)">確認付款</button></td></tr>`).join("");
+async function deleteSingleOrder(orderId,btn){
+  if(!confirm("確定刪除此筆訂單？"))return;
+  btn.disabled=true;
+  const r=await gasCall("deleteOrders",{orderIds:JSON.stringify([orderId])});
+  if(r.success){btn.closest("tr").remove();}else{alert("刪除失敗："+r.message);btn.disabled=false;}
 }
 
+// ── 付款管理 ──
+async function loadPayment(){
+  const data=await gasCall("allOrders",{status:"all"});if(!data.success)return;
+  const pending=data.orders.filter(o=>o.status==="待確認");
+  document.getElementById("tb-payment").innerHTML=pending.length===0
+    ?"<tr><td colspan='9' style='text-align:center;color:#bbb;padding:24px'>目前無待確認訂單</td></tr>"
+    :pending.map(o=>`
+      <tr>
+        <td><input type="checkbox" class="row-cb payment-cb" data-id="${o.orderId}" onchange="onRowCb(this,'btn-del-payment')"></td>
+        <td style="font-size:.72rem;color:#aaa">${o.orderId}</td>
+        <td>${o.nickname}</td>
+        <td>[${o.productCode}] ${o.productName||""}</td>
+        <td>${o.spec||"—"}</td>
+        <td>${o.qty}</td>
+        <td class="price-gold">NT$${(o.subtotal||0).toLocaleString()}</td>
+        <td><span class="badge badge-${o.status}" id="st-${o.orderId}">${o.status}</span></td>
+        <td style="display:flex;gap:6px">
+          <button class="btn btn-sm btn-dark" onclick="markPaid('${o.orderId}',this)">確認付款</button>
+          <button class="btn btn-sm btn-red" onclick="deleteSinglePayment('${o.orderId}',this)">刪除</button>
+        </td>
+      </tr>`).join("");
+  updateDelBtn();
+}
 async function markPaid(orderId,btn){
   btn.disabled=true;btn.textContent="更新⋯";
   await gasCall("updateStatus",{orderId,status:"已付款"});
-  btn.textContent="✅ 已付款";
-  const st=document.getElementById("st-"+orderId);
+  btn.textContent="✅";const st=document.getElementById("st-"+orderId);
   if(st){st.textContent="已付款";st.className="badge badge-已付款";}
 }
-
-async function loadSummary(filter,el){
-  if(el){document.querySelectorAll("#page-summary .tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");}
-  const data=await gasCall("summary",{filter});
-  if(!data.success)return;
-  document.getElementById("tb-summary").innerHTML=data.summary.map(s=>`<tr><td><b>${s.code}</b></td><td>${s.name||"—"}</td><td>${s.spec||"—"}</td><td style="font-size:1.1rem;font-weight:500">${s.qty}</td><td style="color:#999">${s.orders} 筆</td></tr>`).join("");
-  document.getElementById("summary-total").textContent="共 "+data.orderCount+" 筆訂單　總數量："+data.total+" 件";
+async function deleteSinglePayment(orderId,btn){
+  if(!confirm("確定刪除此筆訂單？"))return;
+  btn.disabled=true;
+  const r=await gasCall("deleteOrders",{orderIds:JSON.stringify([orderId])});
+  if(r.success){btn.closest("tr").remove();}else{alert("刪除失敗："+r.message);btn.disabled=false;}
 }
 
+// ── 叫貨彙整 ──
+let currentSummaryFilter="all";
+async function loadSummary(filter,el){
+  currentSummaryFilter=filter||"all";
+  if(el){document.querySelectorAll("#page-summary .tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");}
+  const data=await gasCall("allOrders",{status:"all"});if(!data.success)return;
+  // 篩選
+  summaryOrders=data.orders.filter(o=>{
+    if(currentSummaryFilter==="pending")return o.status==="待確認";
+    if(currentSummaryFilter==="paid")return o.status==="已付款";
+    return o.status!=="取消";
+  });
+  // 彙整
+  const map={};
+  summaryOrders.forEach(o=>{
+    const k=o.productCode+"||"+(o.spec||"");
+    if(!map[k])map[k]={code:o.productCode,name:o.productName||"",spec:o.spec||"",qty:0,orders:0};
+    map[k].qty+=o.qty;map[k].orders+=1;
+  });
+  const summary=Object.keys(map).map(k=>({...map[k],key:k})).sort((a,b)=>a.code<b.code?-1:1);
+  const total=summary.reduce((s,x)=>s+x.qty,0);
+  document.getElementById("tb-summary").innerHTML=summary.map(s=>`
+    <tr>
+      <td><input type="checkbox" class="row-cb summary-cb" data-id="${s.key}" onchange="onRowCb(this,'btn-del-summary')"></td>
+      <td><b>${s.code}</b></td>
+      <td>${s.name||"—"}</td>
+      <td>${s.spec||"—"}</td>
+      <td style="font-size:1.1rem;font-weight:500">${s.qty}</td>
+      <td style="color:#999">${s.orders} 筆</td>
+    </tr>`).join("");
+  document.getElementById("summary-total").textContent="共 "+summaryOrders.length+" 筆訂單　總數量："+total+" 件";
+  updateDelBtn();
+}
+
+// ── 商品目錄 ──
 async function loadProducts(){
   const data=await gasCall("getProductsAdmin");
   const tbody=document.getElementById("tb-products");
@@ -356,9 +488,16 @@ async function loadProducts(){
   if(!data.success||!data.products||data.products.length===0){tbody.innerHTML="";emptyEl.style.display="block";return;}
   emptyEl.style.display="none";
   data.products.forEach(p=>{productCache[p.code]=p;});
-  tbody.innerHTML=data.products.map(p=>`<tr><td><b>${p.code}</b></td><td>${p.name||"—"}</td><td>${p.price?"NT$"+p.price.toLocaleString():"—"}</td><td class="price-gold">${p.salePrice?"NT$"+p.salePrice.toLocaleString():"—"}</td><td><span class="badge badge-${p.status==="上架"?"已付款":"取消"}">${p.status||"上架"}</span></td><td><button class="btn btn-sm btn-red" onclick="doDeleteProduct('${p.code}',this)">刪除</button></td></tr>`).join("");
+  tbody.innerHTML=data.products.map(p=>`
+    <tr>
+      <td><b>${p.code}</b></td>
+      <td>${p.name||"—"}</td>
+      <td>${p.price?"NT$"+p.price.toLocaleString():"—"}</td>
+      <td class="price-gold">${p.salePrice?"NT$"+p.salePrice.toLocaleString():"—"}</td>
+      <td><span class="badge badge-${p.status==="上架"?"已付款":"取消"}">${p.status||"上架"}</span></td>
+      <td><button class="btn btn-sm btn-red" onclick="doDeleteProduct('${p.code}',this)">刪除</button></td>
+    </tr>`).join("");
 }
-
 async function doSaveProduct(){
   const code=document.getElementById("p-code").value.trim().toUpperCase();
   const name=document.getElementById("p-name").value.trim();
@@ -369,22 +508,17 @@ async function doSaveProduct(){
   msg.textContent="儲存中⋯";
   try{
     const data=await gasCall("saveProduct",{product:JSON.stringify({code,name,price,salePrice:sale})});
-    if(data.success){
-      msg.textContent="✅ 商品 "+code+" 已"+(data.action==="created"?"建立":"更新");
-      ["p-code","p-name","p-price","p-sale"].forEach(id=>{document.getElementById(id).value="";});
-      loadProducts();
-    }else{msg.textContent="❌ "+data.message;}
+    if(data.success){msg.textContent="✅ 商品 "+code+" 已"+(data.action==="created"?"建立":"更新");["p-code","p-name","p-price","p-sale"].forEach(id=>{document.getElementById(id).value="";});loadProducts();}
+    else{msg.textContent="❌ "+data.message;}
   }catch(e){msg.textContent="❌ 網路錯誤："+e.message;}
 }
-
 async function doDeleteProduct(code,btn){
-  if(!confirm("確定刪除商品 "+code+"？"))return;
-  btn.disabled=true;
+  if(!confirm("確定刪除商品 "+code+"？"))return;btn.disabled=true;
   const data=await gasCall("deleteProduct",{code});
-  if(data.success){btn.closest("tr").remove();}
-  else{alert("刪除失敗："+data.message);btn.disabled=false;}
+  if(data.success){btn.closest("tr").remove();}else{alert("刪除失敗："+data.message);btn.disabled=false;}
 }
 
+// ── 初始化 ──
 (async function init(){
   try{const pd=await gasCall("getProductsAdmin");if(pd.success&&pd.products)pd.products.forEach(p=>{productCache[p.code]=p;});}catch(e){}
   loadDashboard();
