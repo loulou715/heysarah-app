@@ -1,350 +1,394 @@
-// ── 設定 ──────────────────────────────────────────────────────────────
-var CONFIG = {
-  SPREADSHEET_ID: '1Q_FI5qiQkZKM3gx8PliUmkDDQjQz41dD8VbXckF_RVI',
-  SHEET_ORDERS:   '訂單',
-  SHEET_PRODUCTS: '商品',
-  SHEET_MEMBERS:  '會員'
-};
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HEYSARAH | 管理後台</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --gold:#b8975a; --dark:#1a1a1a; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:"Noto Sans TC",sans-serif; background:#f4f4f4; }
+    .sidebar { position:fixed; left:0; top:0; bottom:0; width:220px; background:var(--dark); color:white; padding:24px 0; display:flex; flex-direction:column; z-index:100; }
+    .sidebar-logo { font-size:1.1rem; font-weight:500; color:var(--gold); padding:0 24px 24px; border-bottom:1px solid #333; }
+    .sidebar-logo span { font-size:.65rem; color:#888; display:block; margin-top:2px; letter-spacing:3px; }
+    .nav-item { padding:14px 24px; font-size:.88rem; color:#aaa; cursor:pointer; transition:all .2s; border-left:3px solid transparent; }
+    .nav-item:hover,.nav-item.active { color:white; background:#2a2a2a; border-left-color:var(--gold); }
+    .nav-item .icon { margin-right:10px; }
+    .main { margin-left:220px; padding:32px; }
+    .page-title { font-size:1.4rem; font-weight:500; margin-bottom:24px; color:#333; }
+    .card { background:white; border-radius:16px; padding:24px; margin-bottom:20px; box-shadow:0 2px 12px rgba(0,0,0,.05); }
+    .card-title { font-size:.8rem; color:#999; margin-bottom:16px; font-weight:500; letter-spacing:1px; text-transform:uppercase; }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px; }
+    .stat-box { background:white; border-radius:16px; padding:20px 24px; box-shadow:0 2px 12px rgba(0,0,0,.05); }
+    .stat-num { font-size:2rem; font-weight:500; color:var(--dark); }
+    .stat-label { font-size:.78rem; color:#999; margin-top:4px; }
+    table { width:100%; border-collapse:collapse; font-size:.85rem; }
+    th { text-align:left; padding:10px 12px; color:#999; font-weight:400; border-bottom:1px solid #f0f0f0; font-size:.75rem; }
+    td { padding:12px; border-bottom:1px solid #f9f9f9; color:#333; vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    .badge { font-size:.7rem; padding:3px 10px; border-radius:100px; font-weight:500; display:inline-block; }
+    .badge-pending,.badge-待確認 { background:#fff3cd; color:#856404; }
+    .badge-paid,.badge-已付款 { background:#d1e7dd; color:#0a3622; }
+    .badge-shipped,.badge-已出貨 { background:#cfe2ff; color:#084298; }
+    .badge-cancel,.badge-取消 { background:#f8d7da; color:#842029; }
+    .btn { padding:8px 18px; border-radius:10px; border:none; cursor:pointer; font-size:.82rem; font-family:inherit; }
+    .btn-dark { background:var(--dark); color:white; }
+    .btn-gold { background:var(--gold); color:white; }
+    .btn-red { background:#dc3545; color:white; }
+    .btn-sm { padding:4px 12px; font-size:.75rem; border-radius:8px; }
+    .btn:disabled { opacity:.5; cursor:not-allowed; }
+    textarea { width:100%; border:1.5px solid #eee; border-radius:12px; padding:14px; font-size:.88rem; font-family:inherit; resize:vertical; outline:none; }
+    textarea:focus { border-color:var(--gold); }
+    input { border:1.5px solid #eee; border-radius:10px; padding:10px 14px; font-size:.88rem; font-family:inherit; outline:none; }
+    input:focus { border-color:var(--gold); }
+    .import-row { display:flex; gap:10px; margin-top:12px; align-items:center; }
+    .import-row input { flex:1; }
+    .tabs { display:flex; gap:4px; margin-bottom:20px; flex-wrap:wrap; }
+    .tab { padding:8px 18px; border-radius:10px; border:none; cursor:pointer; font-size:.82rem; font-family:inherit; background:#eee; color:#666; }
+    .tab.active { background:var(--dark); color:white; }
+    .hidden { display:none; }
+    .product-form { display:grid; grid-template-columns:100px 1fr 100px 120px auto; gap:10px; align-items:end; }
+    .form-group label { font-size:.75rem; color:#999; display:block; margin-bottom:4px; }
+    .form-group input { width:100%; }
+    .detect-area { margin-top:10px; min-height:20px; }
+    .detect-chip { display:inline-block; background:#e8f5e9; color:#2e7d32; border-radius:20px; padding:4px 12px; font-size:.76rem; margin:3px; }
+    .price-gold { color:var(--gold); font-weight:500; }
+  </style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo">HEYSARAH <span>ADMIN v4.1</span></div>
+  <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="icon">📊</span>總覽</div>
+  <div class="nav-item" onclick="showPage('orders',this)"><span class="icon">📋</span>訂單管理</div>
+  <div class="nav-item" onclick="showPage('import',this)"><span class="icon">📥</span>批次匯入</div>
+  <div class="nav-item" onclick="showPage('payment',this)"><span class="icon">💳</span>付款管理</div>
+  <div class="nav-item" onclick="showPage('summary',this)"><span class="icon">📦</span>叫貨彙整</div>
+  <div class="nav-item" onclick="showPage('products',this)"><span class="icon">🏷️</span>商品目錄</div>
+</div>
+<div class="main">
+  <div id="page-dashboard">
+    <div class="page-title">📊 總覽</div>
+    <div class="stats">
+      <div class="stat-box"><div class="stat-num" id="stat-total">—</div><div class="stat-label">總訂單數</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-pending">—</div><div class="stat-label">待確認</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-paid">—</div><div class="stat-label">已付款</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">最新訂單</div>
+      <table><thead><tr><th>時間</th><th>名稱</th><th>商品</th><th>數量</th><th>金額</th><th>狀態</th></tr></thead>
+      <tbody id="tb-recent"></tbody></table>
+    </div>
+  </div>
+  <div id="page-orders" class="hidden">
+    <div class="page-title">📋 訂單管理</div>
+    <div class="tabs">
+      <button class="tab active" onclick="filterOrders('all',this)">全部</button>
+      <button class="tab" onclick="filterOrders('待確認',this)">待確認</button>
+      <button class="tab" onclick="filterOrders('已付款',this)">已付款</button>
+      <button class="tab" onclick="filterOrders('已出貨',this)">已出貨</button>
+    </div>
+    <div class="card">
+      <table><thead><tr><th>訂單編號</th><th>名稱</th><th>商品</th><th>規格</th><th>數量</th><th>金額</th><th>狀態</th><th>操作</th></tr></thead>
+      <tbody id="tb-orders"></tbody></table>
+    </div>
+  </div>
+  <div id="page-import" class="hidden">
+    <div class="page-title">📥 批次匯入訂單</div>
+    <div class="card">
+      <div class="card-title">貼上 LINE 群組訊息</div>
+      <textarea id="importText" rows="12" placeholder="直接貼上整段 LINE 群組對話&#10;系統自動偵測商品公告價格並解析訂單" oninput="previewImport()"></textarea>
+      <div class="detect-area" id="detect-products"></div>
+      <div class="import-row">
+        <input id="importNickname" placeholder="統一暱稱（選填）">
+        <button class="btn btn-gold" onclick="doImport()">解析並匯入</button>
+      </div>
+      <div id="import-result" style="margin-top:14px;font-size:.85rem;color:#666;"></div>
+    </div>
+    <div class="card" id="preview-card" style="display:none">
+      <div class="card-title">解析預覽</div>
+      <table><thead><tr><th>款號</th><th>規格</th><th>數量</th><th>單價</th><th>小計</th><th>顧客</th></tr></thead>
+      <tbody id="tb-preview"></tbody></table>
+    </div>
+  </div>
+  <div id="page-payment" class="hidden">
+    <div class="page-title">💳 付款管理</div>
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between">
+        <span>待確認訂單</span>
+        <button class="btn btn-sm btn-dark" onclick="loadPayment()">重新整理</button>
+      </div>
+      <table><thead><tr><th>訂單編號</th><th>名稱</th><th>商品</th><th>規格</th><th>數量</th><th>金額</th><th>狀態</th><th>操作</th></tr></thead>
+      <tbody id="tb-payment"></tbody></table>
+    </div>
+  </div>
+  <div id="page-summary" class="hidden">
+    <div class="page-title">📦 叫貨彙整</div>
+    <div class="tabs">
+      <button class="tab active" onclick="loadSummary('all',this)">全部有效</button>
+      <button class="tab" onclick="loadSummary('pending',this)">待確認</button>
+      <button class="tab" onclick="loadSummary('paid',this)">已付款</button>
+    </div>
+    <div class="card">
+      <table><thead><tr><th>商品編號</th><th>品名</th><th>規格</th><th>總數量</th><th>筆數</th></tr></thead>
+      <tbody id="tb-summary"></tbody></table>
+      <div id="summary-total" style="text-align:right;margin-top:12px;font-size:.85rem;color:#999;"></div>
+    </div>
+  </div>
+  <div id="page-products" class="hidden">
+    <div class="page-title">🏷️ 商品目錄</div>
+    <div class="card">
+      <div class="card-title">手動新增／更新商品</div>
+      <div class="product-form">
+        <div class="form-group"><label>款號 ＊</label><input id="p-code" placeholder="E43" style="text-transform:uppercase"></div>
+        <div class="form-group"><label>品名（選填）</label><input id="p-name" placeholder="芭蕾舞風德訓鞋"></div>
+        <div class="form-group"><label>定價</label><input id="p-price" type="number" placeholder="1280"></div>
+        <div class="form-group"><label>連線優惠價</label><input id="p-sale" type="number" placeholder="1080"></div>
+        <button class="btn btn-dark" onclick="doSaveProduct()" style="height:42px;white-space:nowrap">儲存商品</button>
+      </div>
+      <div id="product-msg" style="margin-top:10px;font-size:.82rem;color:#666;"></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>商品清單</span>
+        <button class="btn btn-sm btn-dark" onclick="loadProducts()">重新載入</button>
+      </div>
+      <table><thead><tr><th>款號</th><th>品名</th><th>定價</th><th>連線優惠</th><th>狀態</th><th>操作</th></tr></thead>
+      <tbody id="tb-products"></tbody></table>
+      <div id="products-empty" style="text-align:center;padding:32px;color:#bbb;font-size:.88rem;display:none">尚無商品資料</div>
+    </div>
+  </div>
+</div>
+<script>
+const API="https://script.google.com/macros/s/AKfycbxAampl5u_AKoSlrpP7b3nXiVu-L9ZmmKslS-Qaa-ya_G0UwkUQCIdU8xUKMipu1-hCHw/exec";
+let allOrders=[],productCache={};
 
-// ── doGet ──────────────────────────────────────────────────────────────
-function doGet(e) {
-  var p = e.parameter || {};
-  var action = p.action || '';
-  var result;
+async function gasCall(action,params={}){
+  const qs=Object.entries({action,...params}).map(([k,v])=>k+"="+encodeURIComponent(v)).join("&");
+  const res=await fetch(API+"?"+qs);
+  return res.json();
+}
 
-  try {
-    if (action === 'allOrders') {
-      result = getAllOrders(p.status || 'all');
+function showPage(name,el){
+  ["dashboard","orders","import","payment","summary","products"].forEach(p=>{
+    document.getElementById("page-"+p).classList.toggle("hidden",p!==name);
+  });
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
+  if(el)el.classList.add("active");
+  if(name==="dashboard")loadDashboard();
+  if(name==="orders")loadOrders("all");
+  if(name==="payment")loadPayment();
+  if(name==="summary")loadSummary("all");
+  if(name==="products")loadProducts();
+}
 
-    } else if (action === 'getProducts' || action === 'getProductsAdmin') {
-      result = getProductsAdmin();
+function normalize(t){
+  return t.replace(/[Ａ-Ｚ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
+    .replace(/[ａ-ｚ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
+    .replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
+    .replace(/＋/g,"+").replace(/　/g," ");
+}
 
-    } else if (action === 'saveProduct') {
-      result = saveProduct(JSON.parse(p.product || '{}'));
-
-    } else if (action === 'saveProducts') {
-      var plist = JSON.parse(p.products || '[]');
-      var saved = 0;
-      for (var k = 0; k < plist.length; k++) {
-        var sr = saveProduct(plist[k]);
-        if (sr.success) saved++;
+function parseProductsFromText(text){
+  const lines=normalize(text).split("\n");
+  const found=[],seen={};
+  function findAbove(idx){
+    for(let j=idx;j>=Math.max(0,idx-20);j--){
+      let line=lines[j].trim();
+      if(!line)continue;
+      const tm=line.match(/^\d{1,2}:\d{2}(?::\d{2})?\s+\S+\s+(.*)/);
+      if(tm)line=tm[1].trim();
+      line=line.replace(/^[^\w\u4e00-\u9fffA-Za-z]+/,"").trim();
+      const cm=line.match(/^([A-Za-z]\d{2,3})\s+(.{1,30})/);
+      if(cm){
+        const code=cm[1].toUpperCase();
+        const name=cm[2].trim().replace(/\s{2,}/g," ").substring(0,20).trim();
+        if(name.length>=1)return{code,name};
       }
-      result = { success: true, saved: saved };
-
-    } else if (action === 'deleteProduct') {
-      result = deleteProduct(p.code || '');
-
-    } else if (action === 'import' || action === 'batchImport') {
-      result = batchImportOrders(JSON.parse(p.orders || '[]'));
-
-    } else if (action === 'query' || action === 'queryOrders') {
-      result = queryOrdersByNickname(p.nickname || '');
-
-    } else if (action === 'updateStatus') {
-      result = updateOrderStatus(p.orderId || '', p.status || '');
-
-    } else if (action === 'summary') {
-      result = getOrderSummary(p.filter || 'all');
-
-    } else if (action === 'deleteOrders') {
-      result = deleteOrders(JSON.parse(p.orderIds || '[]'));
-
-    } else if (action === 'setup') {
-      setupSheets();
-      result = { success: true, message: 'Setup complete' };
-
-    } else {
-      result = { success: true, message: 'HEYSARAH API v4.1', version: '4.1' };
     }
-  } catch (err) {
-    result = { success: false, message: err.message };
+    return null;
   }
-
-  return ContentService
-    .createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON);
+  for(let i=0;i<lines.length;i++){
+    const line=lines[i].trim();
+    if(!line)continue;
+    let price=0,salePrice=0;
+    const m1=line.match(/\$\s*(\d{3,5})[^\d$\n]*連線優惠[^\d$\n]*\$\s*(\d{3,5})/);
+    if(m1){price=parseInt(m1[1]);salePrice=parseInt(m1[2]);}
+    if(!price){
+      const m2=line.match(/連線優惠\s*\$\s*(\d{3,5})/);
+      if(m2){
+        salePrice=parseInt(m2[1]);
+        const m2p=line.match(/\$\s*(\d{3,5})[^\d]*連線優惠/);
+        if(m2p){price=parseInt(m2p[1]);}
+        else{for(let k=i-1;k>=Math.max(0,i-3);k--){const mk=lines[k].trim().match(/\$\s*(\d{3,5})/);if(mk){price=parseInt(mk[1]);break;}}}
+      }
+    }
+    if(!price){
+      const m3=line.match(/^\s*(?:定價)?\s*\$\s*(\d{3,5})\s*[\/\\]?\s*$/);
+      if(m3){for(let n=i+1;n<=Math.min(i+2,lines.length-1);n++){const m3n=lines[n].trim().match(/連線優惠\s*\$\s*(\d{3,5})/);if(m3n){price=parseInt(m3[1]);salePrice=parseInt(m3n[1]);break;}}}
+    }
+    if(!price||!salePrice||salePrice>=price)continue;
+    const prod=findAbove(i-1);
+    if(prod&&!seen[prod.code]){seen[prod.code]=true;found.push({code:prod.code,name:prod.name,price,salePrice,note:""});}
+  }
+  return found;
 }
 
-// ── 取得所有訂單（13欄結構）────────────────────────────────────────────
-function getAllOrders(statusFilter) {
-  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
-  var sheet = ss.getSheetByName(CONFIG.SHEET_ORDERS);
-  if (!sheet) return { success: true, orders: [] };
-
-  var data = sheet.getDataRange().getValues();
-  var orders = [];
-
-  for (var i = 1; i < data.length; i++) {
-    var row = data[i];
-    if (!row[0]) continue;
-    var status = String(row[10] || '待確認');
-    if (statusFilter && statusFilter !== 'all' && status !== statusFilter) continue;
-
-    orders.push({
-      orderId:     String(row[0]),
-      timestamp:   row[1] ? Utilities.formatDate(new Date(row[1]), 'Asia/Taipei', 'yyyy-MM-dd HH:mm:ss') : '',
-      nickname:    String(row[2] || ''),
-      userId:      String(row[3] || ''),
-      productCode: String(row[4] || ''),
-      productName: String(row[5] || ''),
-      spec:        String(row[6] || ''),
-      qty:         Number(row[7]) || 0,
-      unitPrice:   Number(row[8]) || 0,
-      subtotal:    Number(row[9]) || 0,
-      status:      status,
-      note:        String(row[11] || ''),
-      easyStoreId: String(row[12] || '')
-    });
-  }
-
-  return { success: true, orders: orders };
-}
-
-// ── 取得商品目錄（含下架，管理員用）─────────────────────────────────────
-function getProductsAdmin() {
-  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
-  var sheet = ss.getSheetByName(CONFIG.SHEET_PRODUCTS);
-  if (!sheet) return { success: true, products: [] };
-
-  var data = sheet.getDataRange().getValues();
-  var products = [];
-
-  for (var i = 1; i < data.length; i++) {
-    if (!data[i][0]) continue;
-    products.push({
-      code:        String(data[i][0]).toUpperCase(),
-      name:        String(data[i][1] || ''),
-      price:       Number(data[i][2]) || 0,
-      image:       String(data[i][3] || ''),
-      status:      String(data[i][4] || '上架'),
-      easyStoreId: String(data[i][5] || ''),
-      stock:       Number(data[i][6]) || 0,
-      salePrice:   Number(data[i][7]) || 0,
-      note:        String(data[i][8] || '')
-    });
-  }
-
-  return { success: true, products: products };
-}
-
-// ── 商品 Map（供訂單匯入查詢價格用）─────────────────────────────────────
-function getProductMap() {
-  var result = getProductsAdmin();
-  var map = {};
-  if (result.success) {
-    result.products.forEach(function(p) {
-      map[p.code] = p;
-    });
-  }
-  return map;
-}
-
-// ── 儲存單一商品（新增或更新，名稱可選）─────────────────────────────────
-function saveProduct(p) {
-  if (!p.code) return { success: false, message: '缺少商品編號' };
-
-  var code = String(p.code).toUpperCase().trim();
-  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
-  var sheet = ss.getSheetByName(CONFIG.SHEET_PRODUCTS);
-
-  // 若工作表不存在，自動建立並加入標題列
-  if (!sheet) {
-    sheet = ss.insertSheet(CONFIG.SHEET_PRODUCTS);
-    sheet.appendRow(['商品編號','品名','定價','圖片網址','狀態','EasyStoreID','庫存','連線優惠價','備註']);
-  }
-
-  var data = sheet.getDataRange().getValues();
-
-  // 找現有列，有則更新（保留原值若新值未傳入）
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).toUpperCase().trim() === code) {
-      sheet.getRange(i + 1, 1, 1, 9).setValues([[
-        code,
-        p.name        !== undefined ? String(p.name)        : String(data[i][1] || ''),
-        p.price       !== undefined ? Number(p.price)       : Number(data[i][2] || 0),
-        p.image       !== undefined ? String(p.image)       : String(data[i][3] || ''),
-        p.status      !== undefined ? String(p.status)      : String(data[i][4] || '上架'),
-        p.easyStoreId !== undefined ? String(p.easyStoreId) : String(data[i][5] || ''),
-        p.stock       !== undefined ? Number(p.stock)       : Number(data[i][6] || 0),
-        p.salePrice   !== undefined ? Number(p.salePrice)   : Number(data[i][7] || 0),
-        p.note        !== undefined ? String(p.note)        : String(data[i][8] || '')
-      ]]);
-      return { success: true, action: 'updated', code: code };
+function parseOrdersFromText(text,defaultNick){
+  const lines=normalize(text).split("\n");
+  const orders=[];
+  const lineRe=/^\d{1,2}:\d{2}(?::\d{2})?\s+(\S+)\s+(.*)/;
+  const orderRe=/([A-Za-z]\d{2,3})\s*([^+\n]*?)\s*\+\s*(\d+)/gi;
+  for(const raw of lines){
+    const line=raw.trim();
+    if(!line)continue;
+    const lm=line.match(lineRe);
+    const msg=lm?lm[2].trim():line;
+    const nick=lm?lm[1]:null;
+    if(/連線優惠|\$\d{3,5}/.test(msg))continue;
+    if(/^EX:|^例如|^範例|^注意|^說明/.test(msg))continue;
+    let om;orderRe.lastIndex=0;
+    while((om=orderRe.exec(msg))!==null){
+      const code=om[1].toUpperCase();
+      const spec=om[2].trim().replace(/^[\/\-\s]+|[\/\-\s]+$/g,"").trim();
+      const qty=parseInt(om[3]);
+      const nickname=defaultNick||nick||"後台匯入";
+      const info=productCache[code];
+      const unitPrice=info?(info.salePrice||info.price||0):0;
+      orders.push({productCode:code,spec,qty,nickname,unitPrice,subtotal:unitPrice*qty});
     }
   }
-
-  // 新列
-  sheet.appendRow([
-    code,
-    String(p.name       || ''),
-    Number(p.price      || 0),
-    String(p.image      || ''),
-    String(p.status     || '上架'),
-    String(p.easyStoreId|| ''),
-    Number(p.stock      || 0),
-    Number(p.salePrice  || 0),
-    String(p.note       || '')
-  ]);
-
-  return { success: true, action: 'created', code: code };
+  return orders;
 }
 
-// ── 刪除商品 ──────────────────────────────────────────────────────────
-function deleteProduct(code) {
-  if (!code) return { success: false, message: '缺少商品編號' };
-  code = String(code).toUpperCase().trim();
-
-  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
-  var sheet = ss.getSheetByName(CONFIG.SHEET_PRODUCTS);
-  if (!sheet) return { success: false, message: '商品工作表不存在' };
-
-  var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).toUpperCase().trim() === code) {
-      sheet.deleteRow(i + 1);
-      return { success: true, deleted: code };
-    }
-  }
-  return { success: false, message: '找不到商品 ' + code };
+function previewImport(){
+  const text=document.getElementById("importText").value;
+  const detectEl=document.getElementById("detect-products");
+  const previewCard=document.getElementById("preview-card");
+  if(!text.trim()){detectEl.innerHTML="";previewCard.style.display="none";return;}
+  const products=parseProductsFromText(text);
+  if(products.length>0){
+    products.forEach(p=>{productCache[p.code]=p;});
+    detectEl.innerHTML="🔍 偵測到商品："+products.map(p=>`<span class="detect-chip">${p.code} ${p.name||""} $${p.price}→連線$${p.salePrice}</span>`).join("");
+  }else{detectEl.innerHTML="";}
+  const nick=document.getElementById("importNickname").value.trim();
+  const orders=parseOrdersFromText(text,nick);
+  if(orders.length>0){
+    previewCard.style.display="block";
+    document.getElementById("tb-preview").innerHTML=orders.map(o=>`<tr><td><b>${o.productCode}</b></td><td>${o.spec||"—"}</td><td>${o.qty}</td><td>${o.unitPrice?"NT$"+o.unitPrice.toLocaleString():"<span style='color:#bbb'>待查</span>"}</td><td>${o.subtotal?"NT$"+o.subtotal.toLocaleString():"—"}</td><td style="color:#999">${o.nickname}</td></tr>`).join("");
+  }else{previewCard.style.display="none";}
 }
 
-// ── 批次匯入訂單 ──────────────────────────────────────────────────────
-function batchImportOrders(orders) {
-  if (!orders || !orders.length) return { success: false, message: '無訂單資料' };
-
-  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
-  var sheet = ss.getSheetByName(CONFIG.SHEET_ORDERS);
-  if (!sheet) {
-    sheet = ss.insertSheet(CONFIG.SHEET_ORDERS);
-    sheet.appendRow(['訂單編號','訂單時間','社群暱稱','LINE userId','商品編號','商品名稱','規格','數量','單價','小計','處理狀態','備註','EasyStore訂單ID']);
+async function doImport(){
+  const text=document.getElementById("importText").value.trim();
+  const nickname=document.getElementById("importNickname").value.trim();
+  const el=document.getElementById("import-result");
+  if(!text){el.textContent="請貼上訊息";return;}
+  el.textContent="處理中⋯";
+  const products=parseProductsFromText(text);
+  let savedMsg="";
+  if(products.length>0){
+    try{const pr=await gasCall("saveProducts",{products:JSON.stringify(products)});products.forEach(p=>{productCache[p.code]=p;});savedMsg="自動建立 "+(pr.saved||products.length)+" 項商品，";}catch(e){}
   }
-
-  var productMap = getProductMap();
-  var now = new Date();
-  var dateStr = Utilities.formatDate(now, 'Asia/Taipei', 'yyyyMMdd');
-  var rows = [];
-  var count = 0;
-
-  orders.forEach(function(o) {
-    var code = String(o.productCode || '').toUpperCase().trim();
-    var info = productMap[code];
-    // 優先使用前端傳來的 unitPrice，其次查商品目錄，最後 0
-    var unitPrice = Number(o.unitPrice) || (info ? (info.salePrice || info.price || 0) : 0);
-    var qty = Number(o.qty) || 1;
-    count++;
-    var orderId = 'HS-' + dateStr + '-' + String(Date.now()).slice(-4) + String(count).padStart(2, '0');
-
-    rows.push([
-      orderId,
-      now,
-      String(o.nickname || '後台匯入'),
-      String(o.userId   || ''),
-      code,
-      info ? (info.name || String(o.productName || '')) : String(o.productName || ''),
-      String(o.spec  || ''),
-      qty,
-      unitPrice,
-      unitPrice * qty,
-      '待確認',
-      String(o.note  || ''),
-      ''
-    ]);
-  });
-
-  if (rows.length > 0) {
-    sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, 13).setValues(rows);
-  }
-
-  return { success: true, count: count };
+  const orders=parseOrdersFromText(text,nickname);
+  if(!orders.length){el.textContent="❌ 未偵測到訂單，請確認格式（如：A01黑L+1）";return;}
+  try{
+    const data=await gasCall("import",{orders:JSON.stringify(orders)});
+    el.innerHTML=data.success?"✅ "+savedMsg+"成功匯入 "+data.count+" 筆訂單":"❌ "+data.message;
+  }catch(e){el.textContent="❌ 網路錯誤："+e.message;}
 }
 
-// ── 依暱稱查詢訂單 ────────────────────────────────────────────────────
-function queryOrdersByNickname(nickname) {
-  var result = getAllOrders('all');
-  if (!result.success) return result;
-
-  var filtered = nickname
-    ? result.orders.filter(function(o) { return o.nickname.indexOf(nickname) !== -1; })
-    : result.orders;
-
-  return { success: true, orders: filtered };
+async function loadDashboard(){
+  const data=await gasCall("allOrders",{status:"all"});
+  if(!data.success)return;
+  const orders=data.orders;
+  document.getElementById("stat-total").textContent=orders.length;
+  document.getElementById("stat-pending").textContent=orders.filter(o=>o.status==="待確認").length;
+  document.getElementById("stat-paid").textContent=orders.filter(o=>o.status==="已付款").length;
+  document.getElementById("tb-recent").innerHTML=orders.slice(0,8).map(o=>`<tr><td style="color:#999;font-size:.78rem">${(o.timestamp||"").substring(5,16)}</td><td>${o.nickname}</td><td>[${o.productCode}] ${o.productName||""}</td><td>${o.qty}</td><td class="price-gold">NT$${(o.subtotal||0).toLocaleString()}</td><td><span class="badge badge-${o.status}">${o.status}</span></td></tr>`).join("");
 }
 
-// ── 更新訂單狀態 ──────────────────────────────────────────────────────
-function updateOrderStatus(orderId, status) {
-  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
-  var sheet = ss.getSheetByName(CONFIG.SHEET_ORDERS);
-  if (!sheet) return { success: false, message: '訂單表不存在' };
-
-  var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === orderId) {
-      sheet.getRange(i + 1, 11).setValue(status);
-      return { success: true };
-    }
-  }
-  return { success: false, message: '找不到訂單 ' + orderId };
+async function loadOrders(status){
+  const data=await gasCall("allOrders",{status});
+  if(!data.success)return;
+  allOrders=data.orders;renderOrders(allOrders);
 }
 
-// ── 備貨彙整 ──────────────────────────────────────────────────────────
-function getOrderSummary(filter) {
-  var result = getAllOrders('all');
-  if (!result.success) return result;
-
-  var orders = result.orders.filter(function(o) {
-    if (filter === 'pending') return o.status === '待確認';
-    if (filter === 'paid')    return o.status === '已付款';
-    return o.status !== '取消';
-  });
-
-  var map = {};
-  orders.forEach(function(o) {
-    var key = o.productCode + '||' + (o.spec || '');
-    if (!map[key]) {
-      map[key] = { code: o.productCode, name: o.productName || '', spec: o.spec || '', qty: 0, orders: 0 };
-    }
-    map[key].qty += o.qty;
-    map[key].orders += 1;
-  });
-
-  var summary = Object.keys(map).map(function(k) { return map[k]; }).sort(function(a, b) {
-    return a.code < b.code ? -1 : a.code > b.code ? 1 : 0;
-  });
-
-  var totalQty = summary.reduce(function(s, x) { return s + x.qty; }, 0);
-  return { success: true, summary: summary, total: totalQty, orderCount: orders.length };
+function filterOrders(status,el){
+  document.querySelectorAll("#page-orders .tab").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");
+  renderOrders(status==="all"?allOrders:allOrders.filter(o=>o.status===status));
 }
 
-// ── 刪除訂單 ──────────────────────────────────────────────────────────
-function deleteOrders(orderIds) {
-  if (!orderIds || !orderIds.length) return { success: false, message: '無訂單ID' };
-
-  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
-  var sheet = ss.getSheetByName(CONFIG.SHEET_ORDERS);
-  if (!sheet) return { success: false, message: '訂單表不存在' };
-
-  var data = sheet.getDataRange().getValues();
-  var toDelete = [];
-  for (var i = 1; i < data.length; i++) {
-    if (orderIds.indexOf(String(data[i][0])) !== -1) toDelete.push(i + 1);
-  }
-  for (var j = toDelete.length - 1; j >= 0; j--) {
-    sheet.deleteRow(toDelete[j]);
-  }
-  return { success: true, deleted: toDelete.length };
+function renderOrders(orders){
+  document.getElementById("tb-orders").innerHTML=orders.map(o=>`<tr><td style="font-size:.72rem;color:#aaa">${o.orderId}</td><td>${o.nickname}</td><td>[${o.productCode}] ${o.productName||""}</td><td>${o.spec||"—"}</td><td>${o.qty}</td><td class="price-gold">NT$${(o.subtotal||0).toLocaleString()}</td><td><span class="badge badge-${o.status}">${o.status}</span></td><td><select onchange="updateStatus('${o.orderId}',this.value)" style="font-size:.75rem;padding:3px 6px;border-radius:6px;border:1px solid #eee">${["待確認","已付款","已出貨","取消"].map(s=>`<option ${s===o.status?"selected":""}>${s}</option>`).join("")}</select></td></tr>`).join("");
 }
 
-// ── 初始化工作表 ──────────────────────────────────────────────────────
-function setupSheets() {
-  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+async function updateStatus(orderId,status){await gasCall("updateStatus",{orderId,status});}
 
-  if (!ss.getSheetByName(CONFIG.SHEET_ORDERS)) {
-    var os = ss.insertSheet(CONFIG.SHEET_ORDERS);
-    os.appendRow(['訂單編號','訂單時間','社群暱稱','LINE userId','商品編號','商品名稱','規格','數量','單價','小計','處理狀態','備註','EasyStore訂單ID']);
-  }
-
-  if (!ss.getSheetByName(CONFIG.SHEET_PRODUCTS)) {
-    var ps = ss.insertSheet(CONFIG.SHEET_PRODUCTS);
-    ps.appendRow(['商品編號','品名','定價','圖片網址','狀態','EasyStoreID','庫存','連線優惠價','備註']);
-  }
+async function loadPayment(){
+  const data=await gasCall("allOrders",{status:"all"});
+  if(!data.success)return;
+  const pending=data.orders.filter(o=>o.status==="待確認");
+  document.getElementById("tb-payment").innerHTML=pending.length===0?"<tr><td colspan='8' style='text-align:center;color:#bbb;padding:24px'>目前無待確認訂單</td></tr>":pending.map(o=>`<tr><td style="font-size:.72rem;color:#aaa">${o.orderId}</td><td>${o.nickname}</td><td>[${o.productCode}] ${o.productName||""}</td><td>${o.spec||"—"}</td><td>${o.qty}</td><td class="price-gold">NT$${(o.subtotal||0).toLocaleString()}</td><td><span class="badge badge-${o.status}" id="st-${o.orderId}">${o.status}</span></td><td><button class="btn btn-sm btn-dark" onclick="markPaid('${o.orderId}',this)">確認付款</button></td></tr>`).join("");
 }
+
+async function markPaid(orderId,btn){
+  btn.disabled=true;btn.textContent="更新⋯";
+  await gasCall("updateStatus",{orderId,status:"已付款"});
+  btn.textContent="✅ 已付款";
+  const st=document.getElementById("st-"+orderId);
+  if(st){st.textContent="已付款";st.className="badge badge-已付款";}
+}
+
+async function loadSummary(filter,el){
+  if(el){document.querySelectorAll("#page-summary .tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");}
+  const data=await gasCall("summary",{filter});
+  if(!data.success)return;
+  document.getElementById("tb-summary").innerHTML=data.summary.map(s=>`<tr><td><b>${s.code}</b></td><td>${s.name||"—"}</td><td>${s.spec||"—"}</td><td style="font-size:1.1rem;font-weight:500">${s.qty}</td><td style="color:#999">${s.orders} 筆</td></tr>`).join("");
+  document.getElementById("summary-total").textContent="共 "+data.orderCount+" 筆訂單　總數量："+data.total+" 件";
+}
+
+async function loadProducts(){
+  const data=await gasCall("getProductsAdmin");
+  const tbody=document.getElementById("tb-products");
+  const emptyEl=document.getElementById("products-empty");
+  if(!data.success||!data.products||data.products.length===0){tbody.innerHTML="";emptyEl.style.display="block";return;}
+  emptyEl.style.display="none";
+  data.products.forEach(p=>{productCache[p.code]=p;});
+  tbody.innerHTML=data.products.map(p=>`<tr><td><b>${p.code}</b></td><td>${p.name||"—"}</td><td>${p.price?"NT$"+p.price.toLocaleString():"—"}</td><td class="price-gold">${p.salePrice?"NT$"+p.salePrice.toLocaleString():"—"}</td><td><span class="badge badge-${p.status==="上架"?"已付款":"取消"}">${p.status||"上架"}</span></td><td><button class="btn btn-sm btn-red" onclick="doDeleteProduct('${p.code}',this)">刪除</button></td></tr>`).join("");
+}
+
+async function doSaveProduct(){
+  const code=document.getElementById("p-code").value.trim().toUpperCase();
+  const name=document.getElementById("p-name").value.trim();
+  const price=parseInt(document.getElementById("p-price").value)||0;
+  const sale=parseInt(document.getElementById("p-sale").value)||0;
+  const msg=document.getElementById("product-msg");
+  if(!code){msg.textContent="❌ 款號為必填";return;}
+  msg.textContent="儲存中⋯";
+  try{
+    const data=await gasCall("saveProduct",{product:JSON.stringify({code,name,price,salePrice:sale})});
+    if(data.success){
+      msg.textContent="✅ 商品 "+code+" 已"+(data.action==="created"?"建立":"更新");
+      ["p-code","p-name","p-price","p-sale"].forEach(id=>{document.getElementById(id).value="";});
+      loadProducts();
+    }else{msg.textContent="❌ "+data.message;}
+  }catch(e){msg.textContent="❌ 網路錯誤："+e.message;}
+}
+
+async function doDeleteProduct(code,btn){
+  if(!confirm("確定刪除商品 "+code+"？"))return;
+  btn.disabled=true;
+  const data=await gasCall("deleteProduct",{code});
+  if(data.success){btn.closest("tr").remove();}
+  else{alert("刪除失敗："+data.message);btn.disabled=false;}
+}
+
+(async function init(){
+  try{const pd=await gasCall("getProductsAdmin");if(pd.success&&pd.products)pd.products.forEach(p=>{productCache[p.code]=p;});}catch(e){}
+  loadDashboard();
+})();
+</script>
+</body>
+</html>
