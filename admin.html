@@ -201,7 +201,7 @@
 
 </div>
 <script>
-const API="https://script.google.com/macros/s/AKfycbxAampl5u_AKoSlrpP7b3nXiVu-L9ZmmKslS-Qaa-ya_G0UwkUQCIdU8xUKMipu1-hCHw/exec";
+const API="https://script.google.com/macros/s/AKfycbyO0fJgsNKj7_xHwkaAfQjjuJQ6woPYGwmDGU1uqpM1L905FnwfoKwhpSYOc1J-Ehyy/exec";
 let allOrders=[],productCache={},summaryOrders=[];
 
 async function gasCall(action,params={}){
@@ -267,7 +267,6 @@ async function deleteSelectedPayment(){
 async function deleteSelectedSummaryOrders(){
   const keys=getCheckedIds("summary-cb");
   if(!keys.length||!confirm("確定刪除這 "+keys.length+" 款的所有相關訂單？"))return;
-  // 找出對應的 orderId
   const toDelete=summaryOrders.filter(o=>{
     const k=o.productCode+"||"+(o.spec||"");
     return keys.includes(k);
@@ -452,13 +451,11 @@ async function loadSummary(filter,el){
   currentSummaryFilter=filter||"all";
   if(el){document.querySelectorAll("#page-summary .tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");}
   const data=await gasCall("allOrders",{status:"all"});if(!data.success)return;
-  // 篩選
   summaryOrders=data.orders.filter(o=>{
     if(currentSummaryFilter==="pending")return o.status==="待確認";
     if(currentSummaryFilter==="paid")return o.status==="已付款";
     return o.status!=="取消";
   });
-  // 彙整
   const map={};
   summaryOrders.forEach(o=>{
     const k=o.productCode+"||"+(o.spec||"");
