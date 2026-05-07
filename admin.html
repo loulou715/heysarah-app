@@ -1,252 +1,253 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HEYSARAH 後台管理</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="https://script.google.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    body{background:#f5f0eb;font-family:'Noto Sans TC',sans-serif;min-height:100vh;padding-bottom:60px}
-    .header{background:#1a1a1a;color:#fff;padding:16px 24px}
-    .header-title{font-size:.9rem;letter-spacing:4px}
-    .header-sub{font-size:.65rem;color:#888;letter-spacing:2px;margin-top:2px}
-    .tabs{background:#fff;display:flex;border-bottom:1px solid #eee}
-    .tab{flex:1;text-align:center;padding:14px 8px;font-size:.78rem;color:#999;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
-    .tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:500}
-    .content{max-width:760px;margin:0 auto;padding:24px 16px}
-    .card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px}
-    .card-title{font-size:.82rem;font-weight:500;color:#333;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
-    .steps{display:flex;align-items:center;margin-bottom:24px}
-    .step{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:500;background:#eee;color:#999;flex-shrink:0}
-    .step.active{background:#1a1a1a;color:#fff}
-    .step.done{background:#a8d5a2;color:#fff}
-    .step-line{flex:1;height:1px;background:#eee}
-    .chat-area{width:100%;border:1.5px solid #e8e2d9;border-radius:12px;padding:14px;font-size:.84rem;font-family:inherit;background:#faf8f5;resize:vertical;min-height:200px;outline:none;line-height:1.8;transition:border-color .2s}
-    .chat-area:focus{border-color:#b8975a}
-    .chat-area::placeholder{color:#ccc}
-    .hints{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-    .hint-chip{font-size:.68rem;color:#888;background:#f5f5f5;border-radius:100px;padding:4px 10px}
-    .count-bar{display:none;margin-top:10px;font-size:.78rem;color:#1a6b40;font-weight:500}
-    .btn{border:none;border-radius:10px;padding:12px 20px;font-size:.82rem;font-family:inherit;font-weight:500;cursor:pointer;transition:all .2s}
-    .btn-primary{background:#1a1a1a;color:#fff}
-    .btn-primary:hover{opacity:.8}
-    .btn-primary:disabled{background:#ccc;color:#999;cursor:default}
-    .btn-ghost{background:#f5f5f5;color:#666}
-    .btn-ghost:hover{background:#eee}
-    .btn-sm-success{background:#d1fae5;color:#065f46;border:none;border-radius:8px;padding:4px 10px;font-size:.68rem;font-family:inherit;cursor:pointer}
-    .btn-sm-ghost{background:#f5f5f5;color:#666;border:none;border-radius:8px;padding:4px 10px;font-size:.68rem;font-family:inherit;cursor:pointer}
-    .tbl{width:100%;border-collapse:collapse;font-size:.78rem}
-    .tbl th{text-align:left;padding:8px 10px;color:#aaa;font-weight:400;border-bottom:1px solid #f0f0f0}
-    .tbl td{padding:10px;border-bottom:1px solid #f8f8f8;vertical-align:middle}
-    .tbl tr:last-child td{border-bottom:none}
-    .badge{font-size:.68rem;padding:3px 10px;border-radius:100px;font-weight:500;display:inline-block}
-    .s-待確認{background:#fff3cd;color:#856404}
-    .s-已付款{background:#d1e7dd;color:#0a3622}
-    .s-已出貨{background:#cfe2ff;color:#084298}
-    .s-取消{background:#f8d7da;color:#842029}
-    .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-    .filter-btn{border:1.5px solid #e0e0e0;border-radius:100px;padding:6px 14px;font-size:.74rem;font-family:inherit;background:#fff;color:#666;cursor:pointer;transition:all .2s}
-    .filter-btn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
-    .import-table{width:100%;border-collapse:collapse;font-size:.76rem}
-    .import-table th{background:#f8f8f8;padding:8px 10px;text-align:left;color:#666;font-weight:500}
-    .import-table td{padding:8px 10px;border-bottom:1px solid #f0f0f0}
-    .import-table tr:last-child td{border-bottom:none}
-    .import-table input{border:1px solid #e8e8e8;border-radius:6px;padding:4px 8px;font-size:.74rem;font-family:inherit;width:100%;outline:none}
-    .import-table input:focus{border-color:#b8975a}
-    .row-del{background:none;border:none;color:#ddd;cursor:pointer;font-size:1rem;padding:2px 6px;transition:color .2s}
-    .row-del:hover{color:#e53e3e}
-    .empty{text-align:center;color:#bbb;padding:40px 20px;font-size:.82rem}
-    .success-box{text-align:center;padding:32px 20px}
-    .success-box .icon{font-size:3rem;margin-bottom:12px}
-    .success-box .msg{font-size:.9rem;color:#333;margin-bottom:6px;font-weight:500}
-    .success-box .sub{font-size:.76rem;color:#aaa;margin:8px 0 24px}
-    .summary-tbl{width:100%;border-collapse:collapse;font-size:.8rem}
-    .summary-tbl th{background:#1a1a1a;color:#fff;padding:10px 14px;text-align:left;font-weight:400;font-size:.74rem;letter-spacing:1px}
-    .summary-tbl td{padding:12px 14px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
-    .summary-tbl tr:last-child td{border-bottom:none}
-    .summary-tbl tr:hover td{background:#faf8f5}
-    .qty-badge{display:inline-block;background:#1a1a1a;color:#fff;border-radius:100px;padding:3px 14px;font-size:.82rem;font-weight:500;min-width:40px;text-align:center}
-    .code-tag{font-family:monospace;font-size:.8rem;background:#f0ebe3;color:#1a1a1a;border-radius:6px;padding:3px 8px;font-weight:600}
-    .total-bar{background:#f8f8f8;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:.78rem;color:#555}
-    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:100px;font-size:.8rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap}
-    .toast.show{opacity:1}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HEYSARAH 後台管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#f5f5f5;color:#1a1a1a}
+header{background:#1a1a1a;color:#fff;padding:16px 20px;text-align:center}
+header h1{font-size:17px;font-weight:700;letter-spacing:2px}
+header p{font-size:11px;opacity:.4;margin-top:2px}
+.tabs{display:flex;background:#fff;border-bottom:2px solid #e8e8e8;overflow-x:auto}
+.tabs button{flex:1;min-width:80px;padding:13px 6px;font-size:12px;font-weight:500;background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;color:#888;white-space:nowrap;font-family:inherit;transition:all .2s;margin-bottom:-2px}
+.tabs button.active{color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:700}
+.tabs button:hover:not(.active){background:#fafafa}
+.pane{display:none;padding:18px;max-width:1000px;margin:0 auto}
+.pane.active{display:block}
+.card{background:#fff;border-radius:10px;padding:18px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card h3{font-size:13px;font-weight:700;margin-bottom:12px;color:#444}
+textarea{width:100%;height:170px;border:1.5px solid #e0e0e0;border-radius:8px;padding:11px;font-size:13px;resize:vertical;font-family:inherit;line-height:1.7}
+textarea:focus{outline:none;border-color:#1a1a1a}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .2s}
+.btn-dark{background:#1a1a1a;color:#fff}.btn-dark:hover{background:#333}
+.btn-dark:disabled{background:#ccc;cursor:not-allowed}
+.btn-outline{background:#fff;color:#1a1a1a;border:1.5px solid #1a1a1a}
+.btn-outline:hover{background:#f5f5f5}
+.btn-green{background:#22c55e;color:#fff}.btn-green:disabled{background:#ccc;cursor:not-allowed}
+.btn-sm{padding:5px 11px;font-size:12px;border-radius:6px}
+.badge-ok{display:inline-flex;align-items:center;gap:5px;padding:5px 13px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:20px;font-size:12px;font-weight:700}
+.badge-warn{display:inline-flex;align-items:center;gap:5px;padding:5px 13px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:20px;font-size:12px;font-weight:700}
+.hidden{display:none!important}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:9px 11px;background:#f8f8f8;font-weight:700;color:#777;border-bottom:2px solid #ebebeb;white-space:nowrap}
+td{padding:9px 11px;border-bottom:1px solid #f2f2f2;vertical-align:middle}
+tr:hover td{background:#fafafa}
+.tw{overflow-x:auto;border-radius:8px;border:1px solid #ebebeb}
+.sb{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.sb.待確認{background:#fef3c7;color:#b45309}
+.sb.已付款{background:#dbeafe;color:#1d4ed8}
+.sb.已出貨{background:#d1fae5;color:#065f46}
+.sb.取消{background:#fee2e2;color:#dc2626}
+.fb{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.fb button{padding:6px 13px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #ddd;background:#fff;color:#888;font-family:inherit;transition:all .2s}
+.fb button.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.fr{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.ff{display:flex;flex-direction:column;gap:4px}
+.ff label{font-size:11px;font-weight:700;color:#999;text-transform:uppercase}
+.ff input{padding:8px 11px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:13px;font-family:inherit}
+.ff input:focus{outline:none;border-color:#1a1a1a}
+.ff.w80{flex:0 0 80px}.ff.w160{flex:1 1 160px}.ff.w90{flex:0 0 90px}.ff.wauto{flex:1 1 130px}
+.price{font-weight:700;color:#1a1a1a}
+.tot{text-align:right;padding:10px 0 0;font-size:13px;font-weight:700}
+.tot span{font-size:19px;color:#b8924a;margin-left:8px}
+.msg-box{text-align:center;padding:36px;color:#bbb;font-size:13px}
+.loading{text-align:center;padding:28px;color:#aaa;font-size:13px}
+.act{display:flex;gap:5px}
+.be{background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;border-radius:5px;padding:4px 9px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:700}
+.be:hover{background:#e0f2fe}
+.bd{background:#fff0f0;color:#dc2626;border:1px solid #fecaca;border-radius:5px;padding:4px 9px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:700}
+.bd:hover{background:#fee2e2}
+select{padding:7px 10px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:12px;font-family:inherit;background:#fff}
+select:focus{outline:none;border-color:#1a1a1a}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:11px 22px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
 </head>
 <body>
-
-<div class="header">
-  <div class="header-title">HEYSARAH</div>
-  <div class="header-sub">後台管理系統</div>
-</div>
-
+<div class="toast" id="toast"></div>
+<header>
+  <h1>⚙️ HEYSARAH 後台管理</h1>
+  <p>GROUP BUY ERP SYSTEM</p>
+</header>
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('import')">📥 批次匯入</div>
-  <div class="tab" onclick="switchTab('payment')">💳 付款管理</div>
-  <div class="tab" onclick="switchTab('summary')">📦 叫貨彙整</div>
+  <button class="active" id="tbtn-import" onclick="showTab('import')">📥 批次匯入</button>
+  <button id="tbtn-payment" onclick="showTab('payment')">💳 付款管理</button>
+  <button id="tbtn-supplier" onclick="showTab('supplier')">📦 叫貨彙整</button>
+  <button id="tbtn-products" onclick="showTab('products')">📋 商品目錄</button>
 </div>
 
 <!-- 批次匯入 -->
-<div id="tab-import" class="content">
-  <div class="steps">
-    <div class="step active" id="s1">1</div>
-    <div class="step-line"></div>
-    <div class="step" id="s2">2</div>
-    <div class="step-line"></div>
-    <div class="step" id="s3">3</div>
-  </div>
-  <div id="step1">
-    <div class="card">
-      <div class="card-title">
-        <span>貼上社群留言</span>
-        <button class="btn btn-ghost" style="padding:6px 12px;font-size:.74rem" onclick="clearChat()">清除</button>
-      </div>
-      <p style="font-size:.76rem;color:#aaa;margin-bottom:12px">把 LINE 社群訊息全選複製貼在這裡，系統自動辨識下單內容</p>
-      <textarea id="chatInput" class="chat-area" placeholder="在此貼上 LINE 社群訊息..." oninput="onChatInput()"></textarea>
-      <div class="hints">
-        <span class="hint-chip">✓ 時間戳記格式</span>
-        <span class="hint-chip">✓ 暱稱獨立一行</span>
-        <span class="hint-chip">✓ E06 粉+1灰+1（一行多筆）</span>
-        <span class="hint-chip">✓ E11 +1（無規格）</span>
-      </div>
-      <div id="countBar" class="count-bar"></div>
-      <div style="display:flex;justify-content:flex-end;margin-top:16px">
-        <button id="parseBtn" class="btn btn-primary" disabled onclick="doParseStep()">解析訂單</button>
-      </div>
+<div class="pane active" id="pane-import">
+  <div class="card">
+    <h3>貼上 LINE 群組訊息</h3>
+    <textarea id="lineInput" placeholder="將 LINE 群組留言直接貼上，系統自動辨識訂單格式&#10;&#10;支援格式：&#10;10:23 小美 E20奶茶+1&#10;E43 37+1灰+1&#10;E20 奶茶+2藍+1"></textarea>
+    <div style="margin-top:12px;display:flex;align-items:center;flex-wrap:wrap;gap:10px">
+      <button class="btn btn-outline" onclick="doParse()">🔍 解析訂單</button>
+      <span id="detectBadge" class="hidden"></span>
     </div>
   </div>
-  <div id="step2" style="display:none">
-    <div class="card">
-      <div class="card-title">
-        <span>確認解析結果</span>
-        <span id="parseCount" style="font-size:.74rem;color:#aaa"></span>
-      </div>
-      <p style="font-size:.76rem;color:#aaa;margin-bottom:14px">可在表格內直接修改，✕ 可刪除單筆</p>
-      <div style="overflow-x:auto">
-        <table class="import-table">
-          <thead><tr><th>暱稱</th><th>商品代號</th><th>規格</th><th>數量</th><th></th></tr></thead>
-          <tbody id="previewBody"></tbody>
-        </table>
-      </div>
-      <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
-        <button class="btn btn-ghost" onclick="goStep(1)">← 重新貼上</button>
-        <button class="btn btn-primary" onclick="doImport()">匯入 Google Sheets</button>
-      </div>
+  <div class="card hidden" id="previewCard">
+    <h3>訂單預覽</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>#</th><th>暱稱</th><th>商品代號</th><th>商品名稱</th><th>規格</th><th>數量</th><th>單價</th><th>小計</th></tr></thead>
+        <tbody id="previewBody"></tbody>
+      </table>
     </div>
-  </div>
-  <div id="step3" style="display:none">
-    <div class="card">
-      <div class="success-box">
-        <div class="icon">✅</div>
-        <div class="msg">匯入完成！</div>
-        <div class="sub" id="importResult"></div>
-        <button class="btn btn-primary" onclick="resetImport()">繼續匯入</button>
-      </div>
+    <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div class="tot">合計：<span id="previewTotal">—</span></div>
+      <button class="btn btn-green" id="importBtn" onclick="doImport()" disabled>✓ 確認匯入</button>
     </div>
   </div>
 </div>
 
 <!-- 付款管理 -->
-<div id="tab-payment" class="content" style="display:none">
-  <div class="filters">
-    <button class="filter-btn active" onclick="filterOrders('all',this)">全部</button>
-    <button class="filter-btn" onclick="filterOrders('待確認',this)">待確認</button>
-    <button class="filter-btn" onclick="filterOrders('已付款',this)">已付款</button>
-    <button class="filter-btn" onclick="filterOrders('已出貨',this)">已出貨</button>
-  </div>
-  <div class="card" style="padding:0;overflow:hidden">
-    <table class="tbl">
-      <thead><tr><th>訂單</th><th>暱稱</th><th>商品</th><th>金額</th><th>狀態</th><th>操作</th></tr></thead>
-      <tbody id="paymentBody"><tr><td colspan="6"><div class="empty">點選分頁即可載入</div></td></tr></tbody>
-    </table>
+<div class="pane" id="pane-payment">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+      <div class="fb" style="margin:0">
+        <button class="active" onclick="filterPay('all',this)">全部</button>
+        <button onclick="filterPay('待確認',this)">待確認</button>
+        <button onclick="filterPay('已付款',this)">已付款</button>
+        <button onclick="filterPay('已出貨',this)">已出貨</button>
+        <button onclick="filterPay('取消',this)">取消</button>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="loadPayment()">↺ 刷新</button>
+    </div>
+    <div id="paymentTable"><div class="msg-box">請點擊刷新載入訂單</div></div>
   </div>
 </div>
 
 <!-- 叫貨彙整 -->
-<div id="tab-summary" class="content" style="display:none">
-  <div class="card" style="margin-bottom:12px">
-    <div class="card-title">
-      <span>叫貨彙整</span>
-      <button class="btn btn-ghost" style="padding:6px 14px;font-size:.74rem" onclick="loadSummary()">🔄 重新整理</button>
+<div class="pane" id="pane-supplier">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:#999">篩選狀態</span>
+        <select id="supFilter">
+          <option value="all">全部</option>
+          <option value="待確認">待確認</option>
+          <option value="已付款">已付款</option>
+          <option value="已出貨">已出貨</option>
+        </select>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="loadSupplier()">↺ 刷新</button>
     </div>
-    <p style="font-size:.76rem;color:#aaa;margin-bottom:16px">依商品款號自動統計總件數，無需建立商品目錄</p>
-    <div class="filters" id="summaryFilters">
-      <button class="filter-btn active" onclick="setSummaryFilter('all',this)">全部訂單</button>
-      <button class="filter-btn" onclick="setSummaryFilter('待確認',this)">待確認</button>
-      <button class="filter-btn" onclick="setSummaryFilter('已付款',this)">已付款</button>
-    </div>
+    <div id="supplierTable"><div class="msg-box">請點擊刷新載入彙整</div></div>
+    <div class="tot hidden" id="supTotal"></div>
   </div>
-  <div id="summaryContent"><div class="empty">點上方「重新整理」載入叫貨清單</div></div>
 </div>
 
-<div id="toast" class="toast"></div>
+<!-- 商品目錄 -->
+<div class="pane" id="pane-products">
+  <div class="card">
+    <h3 id="prodFormTitle">➕ 新增商品</h3>
+    <div class="fr" style="margin-top:12px">
+      <div class="ff w80"><label>代號 *</label><input id="pCode" placeholder="E20" maxlength="10"></div>
+      <div class="ff w160"><label>商品名稱 *</label><input id="pName" placeholder="V領荷葉套裝"></div>
+      <div class="ff w90"><label>定價</label><input id="pPrice" type="number" placeholder="680" min="0"></div>
+      <div class="ff w90"><label>連線優惠價</label><input id="pSale" type="number" placeholder="628" min="0"></div>
+      <div class="ff wauto"><label>備註</label><input id="pNote" placeholder="顏色/尺寸說明"></div>
+      <div class="ff" style="justify-content:flex-end">
+        <label>&nbsp;</label>
+        <div style="display:flex;gap:7px">
+          <button class="btn btn-dark btn-sm" onclick="doSaveProduct()">💾 儲存</button>
+          <button class="btn btn-outline btn-sm" onclick="clearProdForm()">✕</button>
+        </div>
+      </div>
+    </div>
+    <div id="prodFormMsg" style="margin-top:7px;font-size:12px;min-height:16px"></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3>商品列表</h3>
+      <button class="btn btn-outline btn-sm" onclick="loadProducts()">↺ 刷新</button>
+    </div>
+    <div id="productsTable"><div class="loading">載入中...</div></div>
+  </div>
+</div>
 
 <script>
-var API='https://script.google.com/macros/s/AKfycbxAampl5u_AKoSlrpP7b3nXiVu-L9ZmmKslS-Qaa-ya_G0UwkUQCIdU8xUKMipu1-hCHw/exec';
+var GAS = 'https://script.google.com/macros/s/AKfycbxAampl5u_AKoSlrpP7b3nXiVu-L9ZmmKslS-Qaa-ya_G0UwkUQCIdU8xUKMipu1-hCHw/exec';
+var parsed = [], products = {}, payStatus = 'all';
 
-function gasCall(action,params,onSuccess,onError){
-  var qs='action='+action;
-  for(var k in params){var v=params[k];qs+='&'+k+'='+encodeURIComponent(typeof v==='object'?JSON.stringify(v):v);}
-  fetch(API+'?'+qs).then(function(r){return r.json();}).then(onSuccess)
-    .catch(onError||function(e){showToast('連線失敗：'+e.message,true);});
-}
-function showToast(msg,err){
-  var t=document.getElementById('toast');t.textContent=msg;
-  t.style.background=err?'#c53030':'#1a1a1a';t.classList.add('show');
-  setTimeout(function(){t.classList.remove('show');},3000);
-}
-function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):''}
+document.addEventListener('DOMContentLoaded', function() {
+  gasCall('getProducts', {}, function(d) {
+    (d.products||[]).forEach(function(p){ products[p.code]=p; });
+  });
+  loadProducts();
+});
 
-function switchTab(tab){
-  document.getElementById('tab-import').style.display=tab==='import'?'block':'none';
-  document.getElementById('tab-payment').style.display=tab==='payment'?'block':'none';
-  document.getElementById('tab-summary').style.display=tab==='summary'?'block':'none';
-  var tabs=document.querySelectorAll('.tab');
-  tabs[0].classList.toggle('active',tab==='import');
-  tabs[1].classList.toggle('active',tab==='payment');
-  tabs[2].classList.toggle('active',tab==='summary');
-  if(tab==='payment')loadOrders('all');
-  if(tab==='summary')loadSummary();
+// ── Tab ───────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.pane').forEach(function(e){ e.classList.remove('active'); });
+  document.querySelectorAll('.tabs button').forEach(function(e){ e.classList.remove('active'); });
+  document.getElementById('pane-'+name).classList.add('active');
+  document.getElementById('tbtn-'+name).classList.add('active');
 }
 
-/* 解析核心 */
-function normalize(t){
-  return t.replace(/[＋]/g,'+')
-    .replace(/[Ａ-Ｚ]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
-    .replace(/[ａ-ｚ]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
-    .replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFF10+48);})
-    .replace(/　/g,' ');
+// ── API ───────────────────────────────────────────────────────
+function gasCall(action, params, ok, fail) {
+  var url = GAS + '?action=' + action;
+  for (var k in params) {
+    var v = params[k];
+    url += '&' + k + '=' + encodeURIComponent(typeof v==='object' ? JSON.stringify(v) : v);
+  }
+  fetch(url).then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.success===false) { (fail||function(m){ toast('❌ '+m,1); })(d.message); }
+      else ok(d);
+    })
+    .catch(function(e){ (fail||function(m){ toast('❌ '+m,1); })('網路錯誤: '+e.message); });
 }
-function shouldSkip(line){
-  if(/^\d{4}[.\-\/]\d{1,2}[.\-\/]\d{1,2}/.test(line))return true;
-  if(/已收回訊息/.test(line))return true;
-  if(/^管理員/.test(line))return true;
+
+function toast(msg, err) {
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.style.background=err?'#dc2626':'#1a1a1a';
+  t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); },3000);
+}
+function fmt(n){ return n>0?'$'+Number(n).toLocaleString():'—'; }
+function sbadge(s){ return '<span class="sb '+s+'">'+s+'</span>'; }
+
+// ── 正規化 ────────────────────────────────────────────────────
+function normalize(s){
+  return s.replace(/[Ａ-Ｚａ-ｚ０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);})
+          .replace(/[＋]/g,'+').replace(/[　]/g,' ');
+}
+function shouldSkip(l){
+  if(/^\d{4}[.\-\/]\d{1,2}[.\-\/]\d{1,2}/.test(l)) return true;
+  if(/^\d{1,2}月\d{1,2}日/.test(l)) return true;
+  if(/已收回訊息|傳送貼圖|傳送照片|加入群組|離開群組/.test(l)) return true;
+  if(/^(sarah|heysarah|管理員|小編)/i.test(l)) return true;
   return false;
 }
+
+// ── 解析 ──────────────────────────────────────────────────────
 function parseOrders(text){
-  var lines=normalize(text).split('\n'),results=[],lastNick='';
+  var lines=normalize(text).split('\n'), results=[], lastNick='';
   for(var i=0;i<lines.length;i++){
     var line=lines[i].trim();
-    if(!line||shouldSkip(line))continue;
-    var nick='',orderPart=line;
+    if(!line||shouldSkip(line)) continue;
+    var nick='', orderPart=line;
     var pm=line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s+(\S+)\s+(.*)/);
-    if(pm){nick=pm[2];orderPart=pm[3];lastNick=nick;}
-    else{
+    if(pm){ nick=pm[2]; orderPart=pm[3]; lastNick=nick; }
+    else {
       if(!/[A-Za-z]\d{2}/.test(line)){
-        if(line.length<=20&&line.indexOf('http')===-1)lastNick=line;
+        if(line.length<=20&&line.indexOf('http')===-1) lastNick=line;
         continue;
       }
       nick=lastNick;
     }
     var codeM=orderPart.match(/^([A-Za-z]{1,2}\d{2,3})\s*(.*)/);
-    if(!codeM)continue;
-    var productCode=codeM[1].toUpperCase(),rest=codeM[2];
-    var pairs=[],re=/([^+\d]*?)\s*\+(\d+)/g,m,lastEnd=0;
+    if(!codeM) continue;
+    var code=codeM[1].toUpperCase(), rest=codeM[2];
+    var pairs=[], re=/([^+\d]*?)\s*\+(\d+)/g, m, lastEnd=0;
     while((m=re.exec(rest))!==null){
-      pairs.push({spec:m[1].trim(),qty:parseInt(m[2])});
+      pairs.push({spec:m[1].trim(), qty:parseInt(m[2])});
       lastEnd=m.index+m[0].length;
     }
     if(pairs.length>0){
@@ -254,136 +255,203 @@ function parseOrders(text){
       if(leftover&&leftover.length<=6&&leftover.indexOf(' ')===-1&&leftover.indexOf('+')===-1)
         pairs[pairs.length-1].spec=(pairs[pairs.length-1].spec+leftover).trim();
       pairs.forEach(function(p){
-        if(p.qty>0&&p.qty<100)results.push({nickname:nick||'未填',productCode:productCode,spec:p.spec,qty:p.qty});
+        if(p.qty>0&&p.qty<100)
+          results.push({nickname:nick||'未填',productCode:code,spec:p.spec,qty:p.qty});
       });
     }
   }
   return results;
 }
 
-var _parsed=[];
-function onChatInput(){
-  var text=document.getElementById('chatInput').value;
-  _parsed=parseOrders(text);
-  var bar=document.getElementById('countBar'),btn=document.getElementById('parseBtn');
-  if(_parsed.length>0){bar.textContent='✓ 偵測到 '+_parsed.length+' 筆訂單';bar.style.display='block';btn.disabled=false;}
-  else{bar.style.display='none';btn.disabled=true;}
-}
-function clearChat(){document.getElementById('chatInput').value='';onChatInput();}
-function doParseStep(){
-  if(!_parsed.length)return;
-  var tbody=document.getElementById('previewBody');
-  tbody.innerHTML=_parsed.map(function(o,idx){
-    return '<tr>'+
-      '<td><input value="'+esc(o.nickname)+'" oninput="_parsed['+idx+'].nickname=this.value"></td>'+
-      '<td><input value="'+esc(o.productCode)+'" style="width:65px;text-transform:uppercase" oninput="_parsed['+idx+'].productCode=this.value.toUpperCase()"></td>'+
-      '<td><input value="'+esc(o.spec)+'" oninput="_parsed['+idx+'].spec=this.value"></td>'+
-      '<td><input type="number" value="'+o.qty+'" style="width:55px" oninput="_parsed['+idx+'].qty=parseInt(this.value)||1"></td>'+
-      '<td><button class="row-del" onclick="delRow('+idx+')">✕</button></td>'+
-    '</tr>';
-  }).join('');
-  document.getElementById('parseCount').textContent='共 '+_parsed.length+' 筆';
-  goStep(2);
-}
-function delRow(idx){_parsed.splice(idx,1);doParseStep();}
-function doImport(){
-  var list=_parsed.filter(function(o){return o.productCode&&o.qty>0;});
-  if(!list.length){showToast('沒有可匯入的資料',true);return;}
-  gasCall('import',{orders:list},function(r){
-    if(r.success){document.getElementById('importResult').textContent='成功匯入 '+(r.count||list.length)+' 筆訂單';goStep(3);}
-    else showToast('匯入失敗：'+(r.message||'請確認試算表設定'),true);
-  });
-}
-function resetImport(){
-  _parsed=[];document.getElementById('chatInput').value='';
-  document.getElementById('countBar').style.display='none';
-  document.getElementById('parseBtn').disabled=true;goStep(1);
-}
-function goStep(n){
-  document.getElementById('step1').style.display=n===1?'block':'none';
-  document.getElementById('step2').style.display=n===2?'block':'none';
-  document.getElementById('step3').style.display=n===3?'block':'none';
-  for(var i=1;i<=3;i++){
-    var el=document.getElementById('s'+i);
-    el.className='step'+(i<n?' done':i===n?' active':'');
+function doParse(){
+  var text=document.getElementById('lineInput').value.trim();
+  if(!text){ toast('請貼上 LINE 訊息',1); return; }
+  parsed=parseOrders(text);
+  var badge=document.getElementById('detectBadge');
+  badge.classList.remove('hidden');
+  if(!parsed.length){
+    badge.className='badge-warn'; badge.textContent='⚠ 未偵測到訂單';
+    document.getElementById('previewCard').classList.add('hidden');
+    document.getElementById('importBtn').disabled=true; return;
   }
+  badge.className='badge-ok'; badge.textContent='✓ 偵測到 '+parsed.length+' 筆';
+  renderPreview();
 }
 
-/* 付款管理 */
-var _curFilter='all';
-function loadOrders(status){
-  _curFilter=status;
-  var tbody=document.getElementById('paymentBody');
-  tbody.innerHTML='<tr><td colspan="6"><div class="empty">載入中…</div></td></tr>';
-  gasCall('allOrders',{status:status},function(r){
-    if(!r.success||!r.orders||!r.orders.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty">沒有訂單資料</div></td></tr>';return;}
-    tbody.innerHTML=r.orders.map(function(o){
-      var ops='';
-      if(o.status==='待確認')ops='<button class="btn-sm-success" onclick="setStatus(\''+esc(o.orderId)+'\',\'已付款\')">確認付款</button>';
-      if(o.status==='已付款')ops='<button class="btn-sm-ghost" onclick="setStatus(\''+esc(o.orderId)+'\',\'已出貨\')">出貨</button>';
-      return '<tr>'+
-        '<td style="font-family:monospace;font-size:.7rem;color:#aaa">'+esc(o.orderId)+'</td>'+
-        '<td>'+esc(o.nickname)+'</td>'+
-        '<td>['+esc(o.productCode)+'] '+esc(o.productName||o.productCode)+(o.spec?'<br><span style="font-size:.68rem;color:#aaa">'+esc(o.spec)+'</span>':'')+'</td>'+
-        '<td>NT$'+Number(o.subtotal||0).toLocaleString()+'</td>'+
-        '<td><span class="badge s-'+esc(o.status)+'">'+esc(o.status)+'</span></td>'+
-        '<td>'+ops+'</td>'+
-      '</tr>';
-    }).join('');
+function renderPreview(){
+  var tbody=document.getElementById('previewBody'), total=0;
+  tbody.innerHTML='';
+  parsed.forEach(function(o,i){
+    var p=products[o.productCode]||{};
+    var unit=p.salePrice||p.price||0, sub=unit*o.qty;
+    total+=sub;
+    tbody.innerHTML+='<tr>'+
+      '<td>'+(i+1)+'</td>'+
+      '<td>'+o.nickname+'</td>'+
+      '<td><strong>'+o.productCode+'</strong></td>'+
+      '<td>'+(p.name||'<span style="color:#ccc">未建立</span>')+'</td>'+
+      '<td>'+(o.spec||'—')+'</td>'+
+      '<td>'+o.qty+'</td>'+
+      '<td>'+(unit>0?fmt(unit):'<span style="color:#ccc">未設定</span>')+'</td>'+
+      '<td class="price">'+(sub>0?fmt(sub):'—')+'</td></tr>';
   });
+  document.getElementById('previewTotal').textContent=total>0?fmt(total):'—';
+  document.getElementById('previewCard').classList.remove('hidden');
+  var btn=document.getElementById('importBtn');
+  btn.disabled=false; btn.textContent='✓ 確認匯入 '+parsed.length+' 筆';
 }
-function filterOrders(status,btn){
-  document.querySelectorAll('#tab-payment .filter-btn').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');loadOrders(status);
-}
-function setStatus(orderId,status){
-  gasCall('updateStatus',{orderId:orderId,status:status},function(r){
-    if(r.success){showToast('狀態已更新 ✓');loadOrders(_curFilter);}
-    else showToast('更新失敗',true);
+
+function doImport(){
+  if(!parsed.length) return;
+  var btn=document.getElementById('importBtn');
+  btn.disabled=true; btn.textContent='匯入中...';
+  gasCall('batchImport',{orders:parsed},function(d){
+    toast('✓ 成功匯入 '+d.imported+' 筆訂單');
+    parsed=[];
+    document.getElementById('lineInput').value='';
+    document.getElementById('detectBadge').classList.add('hidden');
+    document.getElementById('previewCard').classList.add('hidden');
+    btn.textContent='✓ 確認匯入'; btn.disabled=true;
+  },function(msg){
+    toast('❌ 匯入失敗：'+msg,1);
+    btn.disabled=false; btn.textContent='✓ 確認匯入 '+parsed.length+' 筆';
   });
 }
 
-/* 叫貨彙整 */
-var _summaryFilter='all',_allOrdersCache=[];
-function setSummaryFilter(f,btn){
-  _summaryFilter=f;
-  document.querySelectorAll('#summaryFilters .filter-btn').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');renderSummary(_allOrdersCache);
+// ── 付款管理 ──────────────────────────────────────────────────
+function filterPay(s,btn){
+  payStatus=s;
+  document.querySelectorAll('#pane-payment .fb button').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active'); loadPayment();
 }
-function loadSummary(){
-  document.getElementById('summaryContent').innerHTML='<div class="empty">載入中…</div>';
-  gasCall('allOrders',{status:'all'},function(r){
-    if(!r.success||!r.orders||!r.orders.length){document.getElementById('summaryContent').innerHTML='<div class="empty">目前沒有訂單資料</div>';return;}
-    _allOrdersCache=r.orders;renderSummary(r.orders);
+function loadPayment(){
+  document.getElementById('paymentTable').innerHTML='<div class="loading">載入中...</div>';
+  var p=payStatus==='all'?{}:{status:payStatus};
+  gasCall('allOrders',p,function(d){ renderPayTable(d.orders||[]); });
+}
+function renderPayTable(orders){
+  if(!orders.length){ document.getElementById('paymentTable').innerHTML='<div class="msg-box">暫無訂單</div>'; return; }
+  var html='<div class="tw"><table><thead><tr><th>訂單編號</th><th>暱稱</th><th>商品代號</th><th>商品名稱</th><th>規格</th><th>數量</th><th>小計</th><th>狀態</th><th>變更狀態</th></tr></thead><tbody>';
+  orders.forEach(function(o){
+    html+='<tr>'+
+      '<td style="font-size:10px;color:#bbb">'+o.orderId+'</td>'+
+      '<td><strong>'+o.nickname+'</strong></td>'+
+      '<td>'+o.productCode+'</td>'+
+      '<td>'+o.productName+'</td>'+
+      '<td>'+(o.spec||'—')+'</td>'+
+      '<td>'+o.qty+'</td>'+
+      '<td class="price">'+(o.subtotal>0?fmt(o.subtotal):'—')+'</td>'+
+      '<td>'+sbadge(o.status)+'</td>'+
+      '<td><select onchange="chgStatus(\''+o.orderId+'\',this.value)">'+
+      ['待確認','已付款','已出貨','取消'].map(function(s){
+        return '<option'+(s===o.status?' selected':'')+'>'+s+'</option>';
+      }).join('')+'</select></td></tr>';
+  });
+  html+='</tbody></table></div>';
+  document.getElementById('paymentTable').innerHTML=html;
+}
+function chgStatus(id,s){
+  gasCall('updateStatus',{orderId:id,status:s},function(){ toast('✓ 狀態已更新：'+s); });
+}
+
+// ── 叫貨彙整 ──────────────────────────────────────────────────
+function loadSupplier(){
+  var s=document.getElementById('supFilter').value;
+  document.getElementById('supplierTable').innerHTML='<div class="loading">載入中...</div>';
+  document.getElementById('supTotal').classList.add('hidden');
+  var p=s==='all'?{}:{status:s};
+  gasCall('allOrders',p,function(d){ renderSupplier(d.orders||[]); });
+}
+function renderSupplier(orders){
+  if(!orders.length){ document.getElementById('supplierTable').innerHTML='<div class="msg-box">暫無訂單</div>'; return; }
+  var grp={}, keys=[];
+  orders.forEach(function(o){
+    var k=o.productCode+'||'+(o.spec||'');
+    if(!grp[k]){ grp[k]={code:o.productCode,spec:o.spec||'',qty:0,subtotal:0}; keys.push(k); }
+    grp[k].qty+=o.qty; grp[k].subtotal+=o.subtotal||0;
+  });
+  keys.sort(function(a,b){ return grp[a].code.localeCompare(grp[b].code); });
+  var totalAmt=0;
+  var html='<div class="tw"><table><thead><tr><th>商品代號</th><th>商品名稱</th><th>規格</th><th>總數量</th><th>單價</th><th>總金額</th></tr></thead><tbody>';
+  keys.forEach(function(k){
+    var g=grp[k], p=products[g.code]||{};
+    var unit=p.salePrice||p.price||0;
+    var total=g.subtotal>0?g.subtotal:(unit*g.qty);
+    totalAmt+=total;
+    html+='<tr>'+
+      '<td><strong>'+g.code+'</strong></td>'+
+      '<td>'+(p.name||'<span style="color:#ccc">未建立</span>')+'</td>'+
+      '<td>'+(g.spec||'—')+'</td>'+
+      '<td style="font-size:15px;font-weight:700">'+g.qty+'</td>'+
+      '<td>'+(unit>0?fmt(unit):'—')+'</td>'+
+      '<td class="price">'+(total>0?fmt(total):'—')+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  document.getElementById('supplierTable').innerHTML=html;
+  var tb=document.getElementById('supTotal');
+  tb.innerHTML='總訂貨金額：<span>'+(totalAmt>0?fmt(totalAmt):'—')+'</span>';
+  tb.classList.remove('hidden');
+}
+
+// ── 商品目錄 ──────────────────────────────────────────────────
+function loadProducts(){
+  document.getElementById('productsTable').innerHTML='<div class="loading">載入中...</div>';
+  gasCall('getProducts',{},function(d){
+    products={};
+    (d.products||[]).forEach(function(p){ products[p.code]=p; });
+    renderProductsTable(d.products||[]);
   });
 }
-function renderSummary(orders){
-  var filtered=_summaryFilter==='all'?orders:orders.filter(function(o){return o.status===_summaryFilter;});
-  if(!filtered.length){document.getElementById('summaryContent').innerHTML='<div class="empty">此篩選條件無訂單</div>';return;}
-  var map={};
-  filtered.forEach(function(o){
-    var key=o.productCode+'@@'+(o.spec||'');
-    if(!map[key])map[key]={productCode:o.productCode,spec:o.spec||'',qty:0,buyers:[]};
-    map[key].qty+=(parseInt(o.qty)||0);
-    if(o.nickname&&map[key].buyers.indexOf(o.nickname)===-1)map[key].buyers.push(o.nickname);
+function renderProductsTable(list){
+  if(!list.length){ document.getElementById('productsTable').innerHTML='<div class="msg-box">尚未建立商品</div>'; return; }
+  var html='<div class="tw"><table><thead><tr><th>商品代號</th><th>商品名稱</th><th>定價</th><th>連線優惠價</th><th>備註</th><th>操作</th></tr></thead><tbody>';
+  list.forEach(function(p){
+    html+='<tr>'+
+      '<td><strong>'+p.code+'</strong></td>'+
+      '<td>'+p.name+'</td>'+
+      '<td>'+(p.price>0?fmt(p.price):'—')+'</td>'+
+      '<td class="price">'+(p.salePrice>0?fmt(p.salePrice):'—')+'</td>'+
+      '<td style="color:#bbb">'+(p.note||'—')+'</td>'+
+      '<td><div class="act">'+
+      '<button class="be" onclick="editProd(\''+p.code+'\')">編輯</button>'+
+      '<button class="bd" onclick="delProd(\''+p.code+'\')">刪除</button>'+
+      '</div></td></tr>';
   });
-  var rows=Object.values(map).sort(function(a,b){
-    return a.productCode<b.productCode?-1:a.productCode>b.productCode?1:a.spec<b.spec?-1:1;
+  html+='</tbody></table></div>';
+  document.getElementById('productsTable').innerHTML=html;
+}
+function doSaveProduct(){
+  var code=document.getElementById('pCode').value.trim().toUpperCase();
+  var name=document.getElementById('pName').value.trim();
+  if(!code||!name){ document.getElementById('prodFormMsg').innerHTML='<span style="color:#dc2626">請填入代號和名稱</span>'; return; }
+  var prod={code:code,name:name,
+    price:Number(document.getElementById('pPrice').value)||0,
+    salePrice:Number(document.getElementById('pSale').value)||0,
+    note:document.getElementById('pNote').value.trim()};
+  gasCall('saveProduct',{product:prod},function(d){
+    var act=d.action==='updated'?'已更新':'已新增';
+    document.getElementById('prodFormMsg').innerHTML='<span style="color:#15803d">✓ '+code+' '+act+'</span>';
+    clearProdForm(); loadProducts(); toast('✓ 商品 '+code+' '+act);
   });
-  var totalQty=rows.reduce(function(s,r){return s+r.qty;},0);
-  document.getElementById('summaryContent').innerHTML=
-    '<div class="card" style="padding:0;overflow:hidden">'+
-    '<table class="summary-tbl"><thead><tr><th>款號</th><th>規格</th><th>件數</th><th>訂購人</th></tr></thead><tbody>'+
-    rows.map(function(r){
-      return '<tr>'+
-        '<td><span class="code-tag">'+esc(r.productCode)+'</span></td>'+
-        '<td>'+(r.spec?esc(r.spec):'<span style="color:#ccc">—</span>')+'</td>'+
-        '<td><span class="qty-badge">'+r.qty+'</span></td>'+
-        '<td style="font-size:.72rem;color:#888">'+esc(r.buyers.join('、'))+'</td>'+
-      '</tr>';
-    }).join('')+
-    '</tbody></table></div>'+
-    '<div class="total-bar"><span>共 <strong>'+rows.length+'</strong> 款</span><span>總計 <strong>'+totalQty+'</strong> 件</span></div>';
+}
+function editProd(code){
+  var p=products[code]; if(!p) return;
+  document.getElementById('pCode').value=p.code;
+  document.getElementById('pName').value=p.name;
+  document.getElementById('pPrice').value=p.price||'';
+  document.getElementById('pSale').value=p.salePrice||'';
+  document.getElementById('pNote').value=p.note||'';
+  document.getElementById('prodFormTitle').textContent='✏️ 編輯商品：'+code;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function delProd(code){
+  if(!confirm('確定刪除商品 '+code+' ？')) return;
+  gasCall('deleteProduct',{code:code},function(){ toast('✓ 已刪除 '+code); loadProducts(); });
+}
+function clearProdForm(){
+  ['pCode','pName','pPrice','pSale','pNote'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('prodFormTitle').textContent='➕ 新增商品';
+  document.getElementById('prodFormMsg').innerHTML='';
 }
 </script>
 </body>
