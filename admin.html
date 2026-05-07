@@ -1,0 +1,303 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="zh-Hant"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;HEYSARAH | 管理後台&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&amp;display=swap" rel="stylesheet"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>:root { --gold:#b8975a; --bg:#f5ede8; --dark:#1a1a1a; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>* { margin:0; padding:0; box-sizing:border-box; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>body { font-family:'Noto Sans TC',sans-serif; background:#f4f4f4; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* 側邊欄 */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.sidebar {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>position: fixed; left:0; top:0; bottom:0; width:220px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: var(--dark); color:white; padding:24px 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display:flex; flex-direction:column;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.sidebar-logo {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size:1.1rem; font-weight:500; color:var(--gold);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding:0 24px 24px; border-bottom:1px solid #333;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.sidebar-logo span { font-size:.65rem; color:#888; display:block; margin-top:2px; letter-spacing:3px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.nav-item {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding:14px 24px; font-size:.88rem; color:#aaa;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>cursor:pointer; transition:all .2s;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.nav-item:hover, .nav-item.active { color:white; background:#2a2a2a; border-left:3px solid var(--gold); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.nav-item .icon { margin-right:10px; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* 主內容 */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.main { margin-left:220px; padding:32px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.page-title { font-size:1.4rem; font-weight:500; margin-bottom:24px; color:#333; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* 卡片 */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.card { background:white; border-radius:16px; padding:24px; margin-bottom:20px; box-shadow:0 2px 12px rgba(0,0,0,.05); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.card-title { font-size:.8rem; color:#999; margin-bottom:16px; font-weight:500; letter-spacing:1px; text-transform:uppercase; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* 統計方塊 */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.stats { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.stat-box { background:white; border-radius:16px; padding:20px 24px; box-shadow:0 2px 12px rgba(0,0,0,.05); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.stat-num { font-size:2rem; font-weight:500; color:var(--dark); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.stat-label { font-size:.78rem; color:#999; margin-top:4px; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* 表格 */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>table { width:100%; border-collapse:collapse; font-size:.85rem; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>th { text-align:left; padding:10px 12px; color:#999; font-weight:400; border-bottom:1px solid #f0f0f0; font-size:.75rem; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>td { padding:12px; border-bottom:1px solid #f9f9f9; color:#333; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tr:last-child td { border-bottom:none; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* 狀態 */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.badge { font-size:.7rem; padding:3px 10px; border-radius:100px; font-weight:500; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.badge-待確認 { background:#fff3cd; color:#856404; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.badge-已付款 { background:#d1e7dd; color:#0a3622; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.badge-已出貨 { background:#cfe2ff; color:#084298; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.badge-取消 <span class="Apple-converted-space">  </span>{ background:#f8d7da; color:#842029; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* 按鈕 */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn { padding:8px 18px; border-radius:10px; border:none; cursor:pointer; font-size:.82rem; font-family:inherit; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn-dark { background:var(--dark); color:white; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn-gold { background:var(--gold); color:white; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn-sm { padding:4px 12px; font-size:.75rem; border-radius:8px; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* 匯入區 */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>textarea { width:100%; border:1.5px solid #eee; border-radius:12px; padding:14px; font-size:.88rem; font-family:inherit; resize:vertical; outline:none; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>textarea:focus { border-color:var(--gold); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.import-row { display:flex; gap:10px; margin-top:12px; align-items:center; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.import-row input { flex:1; border:1.5px solid #eee; border-radius:10px; padding:10px 14px; font-size:.88rem; font-family:inherit; outline:none; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* Tab */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.tabs { display:flex; gap:4px; margin-bottom:20px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.tab { padding:8px 18px; border-radius:10px; border:none; cursor:pointer; font-size:.82rem; font-family:inherit; background:#eee; color:#666; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.tab.active { background:var(--dark); color:white; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>.hidden { display:none; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;div class="sidebar"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="sidebar-logo"&gt;HEYSARAH &lt;span&gt;ADMIN v4.0&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="nav-item active" onclick="showPage('dashboard')"&gt;&lt;span class="icon"&gt;📊&lt;/span&gt;總覽&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="nav-item" onclick="showPage('orders')"&gt;&lt;span class="icon"&gt;📋&lt;/span&gt;訂單管理&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="nav-item" onclick="showPage('import')"&gt;&lt;span class="icon"&gt;📥&lt;/span&gt;批次匯入&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="nav-item" onclick="showPage('summary')"&gt;&lt;span class="icon"&gt;📦&lt;/span&gt;備貨統計&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;div class="main"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- 總覽 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="page-dashboard"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="page-title"&gt;📊 總覽&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="stats"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="stat-box"&gt;&lt;div class="stat-num" id="stat-total"&gt;—&lt;/div&gt;&lt;div class="stat-label"&gt;總訂單數&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="stat-box"&gt;&lt;div class="stat-num" id="stat-pending"&gt;—&lt;/div&gt;&lt;div class="stat-label"&gt;待確認&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="stat-box"&gt;&lt;div class="stat-num" id="stat-paid"&gt;—&lt;/div&gt;&lt;div class="stat-label"&gt;已付款&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card-title"&gt;最新訂單&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;時間&lt;/th&gt;&lt;th&gt;名稱&lt;/th&gt;&lt;th&gt;商品&lt;/th&gt;&lt;th&gt;數量&lt;/th&gt;&lt;th&gt;金額&lt;/th&gt;&lt;th&gt;狀態&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;tbody id="tb-recent"&gt;&lt;/tbody&gt;&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- 訂單管理 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="page-orders" class="hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="page-title"&gt;📋 訂單管理&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="tabs"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="tab active" onclick="filterOrders('all',this)"&gt;全部&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="tab" onclick="filterOrders('待確認',this)"&gt;待確認&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="tab" onclick="filterOrders('已付款',this)"&gt;已付款&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="tab" onclick="filterOrders('已出貨',this)"&gt;已出貨&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;訂單編號&lt;/th&gt;&lt;th&gt;名稱&lt;/th&gt;&lt;th&gt;商品&lt;/th&gt;&lt;th&gt;規格&lt;/th&gt;&lt;th&gt;數量&lt;/th&gt;&lt;th&gt;金額&lt;/th&gt;&lt;th&gt;狀態&lt;/th&gt;&lt;th&gt;操作&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;tbody id="tb-orders"&gt;&lt;/tbody&gt;&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- 批次匯入 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="page-import" class="hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="page-title"&gt;📥 批次匯入訂單&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card-title"&gt;貼上 LINE 訊息&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;textarea id="importText" rows="8" placeholder="貼上社群訊息，例如：&amp;#10;A01黑L+1&amp;#10;B01+2&amp;#10;A02紅M+1"&gt;&lt;/textarea&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="import-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;input id="importNickname" placeholder="顧客名稱（選填）"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="btn btn-gold" onclick="doImport()"&gt;解析並匯入&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="import-result" style="margin-top:14px;font-size:.85rem;color:#666;"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- 備貨統計 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="page-summary" class="hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="page-title"&gt;📦 備貨統計&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="tabs"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="tab active" onclick="loadSummary('all',this)"&gt;全部有效&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="tab" onclick="loadSummary('pending',this)"&gt;待確認&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="tab" onclick="loadSummary('paid',this)"&gt;已付款&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;商品編號&lt;/th&gt;&lt;th&gt;品名&lt;/th&gt;&lt;th&gt;規格&lt;/th&gt;&lt;th&gt;總數量&lt;/th&gt;&lt;th&gt;筆數&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;tbody id="tb-summary"&gt;&lt;/tbody&gt;&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="summary-total" style="text-align:right;margin-top:12px;font-size:.85rem;color:#999;"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const API = 'https://script.google.com/macros/s/AKfycby9JB0Y54FGdqVOPmWhjC83Nm8DcEW2XYXnO6Nnhx9yVWnPVcXbJCvBoo5l-oj4WDk9zA/exec';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>let allOrders = [];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// ── 頁面切換 ─────────────────────────────────────</p>
+<p class="p1"><span class="Apple-converted-space">  </span>function showPage(name) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>['dashboard','orders','import','summary'].forEach(p =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('page-' + p).classList.toggle('hidden', p !== name);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.querySelectorAll('.nav-item').forEach(el =&gt; el.classList.remove('active'));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>event.currentTarget.classList.add('active');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (name === 'dashboard') loadDashboard();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (name === 'orders')<span class="Apple-converted-space">    </span>loadOrders('all');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (name === 'summary') <span class="Apple-converted-space">  </span>loadSummary('all');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// ── 總覽 ─────────────────────────────────────────</p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function loadDashboard() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const data = await apiFetch('allOrders', { status: 'all' });</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!data.success) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const orders = data.orders;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('stat-total').textContent <span class="Apple-converted-space">  </span>= orders.length;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('stat-pending').textContent = orders.filter(o=&gt;o.status==='待確認').length;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('stat-paid').textContent<span class="Apple-converted-space">    </span>= orders.filter(o=&gt;o.status==='已付款').length;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('tb-recent').innerHTML = orders.slice(0,8).map(o=&gt;`</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td style="color:#999;font-size:.78rem"&gt;${o.timestamp.substring(5,16)}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td&gt;${o.nickname}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td&gt;[${o.productCode}] ${o.productName}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td&gt;${o.qty}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td style="color:#b8975a"&gt;NT$${o.subtotal.toLocaleString()}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td&gt;&lt;span class="badge badge-${o.status}"&gt;${o.status}&lt;/span&gt;&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/tr&gt;`).join('');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// ── 訂單管理 ─────────────────────────────────────</p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function loadOrders(status) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const data = await apiFetch('allOrders', { status });</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!data.success) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>allOrders = data.orders;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>renderOrders(allOrders);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>function filterOrders(status, el) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.querySelectorAll('#page-orders .tab').forEach(t=&gt;t.classList.remove('active'));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>el.classList.add('active');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const filtered = status === 'all' ? allOrders : allOrders.filter(o=&gt;o.status===status);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>renderOrders(filtered);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>function renderOrders(orders) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('tb-orders').innerHTML = orders.map(o=&gt;`</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td style="font-size:.72rem;color:#aaa"&gt;${o.orderId}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td&gt;${o.nickname}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td&gt;[${o.productCode}] ${o.productName}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td&gt;${o.spec || '—'}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td&gt;${o.qty}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td style="color:#b8975a"&gt;NT$${o.subtotal.toLocaleString()}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td&gt;&lt;span class="badge badge-${o.status}"&gt;${o.status}&lt;/span&gt;&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;select onchange="updateStatus('${o.orderId}', this.value)" style="font-size:.75rem;padding:3px 6px;border-radius:6px;border:1px solid #eee"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>${['待確認','已付款','已出貨','取消'].map(s=&gt;`&lt;option ${s===o.status?'selected':''}&gt;${s}&lt;/option&gt;`).join('')}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/tr&gt;`).join('');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function updateStatus(orderId, status) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await apiFetch('updateStatus', { orderId, status });</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// ── 批次匯入 ─────────────────────────────────────</p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function doImport() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const text <span class="Apple-converted-space">    </span>= document.getElementById('importText').value.trim();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const nickname = document.getElementById('importNickname').value.trim() || '後台匯入';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const el <span class="Apple-converted-space">      </span>= document.getElementById('import-result');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!text) { el.textContent = '請貼上訂單文字'; return; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 客戶端解析（全形相容）</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const normalized = text</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.replace(/[Ａ-Ｚ]/g, c=&gt;String.fromCharCode(c.charCodeAt(0)-0xFEE0))</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.replace(/[ａ-ｚ]/g, c=&gt;String.fromCharCode(c.charCodeAt(0)-0xFEE0))</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.replace(/[０-９]/g, c=&gt;String.fromCharCode(c.charCodeAt(0)-0xFEE0))</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.replace(/＋/g,'+');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const regex = /([A-Za-z]\d+)\s*([^+\n]*?)\s*\+\s*(\d+)/gi;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const orders = [];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let m;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>while ((m = regex.exec(normalized)) !== null) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>orders.push({</p>
+<p class="p1"><span class="Apple-converted-space">        </span>productCode: m[1].toUpperCase(),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>spec: m[2].trim().replace(/^\/+|\/+$/g,'').trim(),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>qty: parseInt(m[3]),</p>
+<p class="p1"><span class="Apple-converted-space">        </span>nickname</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!orders.length) { el.textContent = '❌ 未解析到訂單，請確認格式（如：A01黑L+1）'; return; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>el.textContent = `解析到 ${orders.length} 筆，匯入中⋯`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const data = await apiFetch('import', { orders: JSON.stringify(orders) });</p>
+<p class="p1"><span class="Apple-converted-space">    </span>el.textContent = data.success ? `✅ 成功匯入 ${data.count} 筆訂單` : '❌ ' + data.message;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// ── 備貨統計 ─────────────────────────────────────</p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function loadSummary(filter, el) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (el) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.querySelectorAll('#page-summary .tab').forEach(t=&gt;t.classList.remove('active'));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>el.classList.add('active');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const data = await apiFetch('summary', { filter });</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!data.success) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('tb-summary').innerHTML = data.summary.map(s=&gt;`</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td&gt;&lt;b&gt;${s.code}&lt;/b&gt;&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td&gt;${s.name}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td&gt;${s.spec || '—'}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td style="font-size:1.1rem;font-weight:500"&gt;${s.qty}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;td style="color:#999"&gt;${s.orders} 筆&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/tr&gt;`).join('');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('summary-total').textContent =</p>
+<p class="p1"><span class="Apple-converted-space">      </span>`共 ${data.orderCount} 筆訂單　總數量：${data.total} 件`;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// ── 共用 fetch ────────────────────────────────────</p>
+<p class="p1"><span class="Apple-converted-space">  </span>async function apiFetch(action, params={}) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const qs = Object.entries({action,...params}).map(([k,v])=&gt;`${k}=${encodeURIComponent(v)}`).join('&amp;');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const res = await fetch(`${API}?${qs}`);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return res.json();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// 初始載入</p>
+<p class="p1"><span class="Apple-converted-space">  </span>loadDashboard();</p>
+<p class="p1">&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
