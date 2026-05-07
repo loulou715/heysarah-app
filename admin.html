@@ -215,6 +215,15 @@ textarea.inp{resize:vertical;line-height:1.7}
 // ★ 你的 GAS API 網址
 var API = 'https://script.google.com/macros/s/AKfycby9JB0Y54FGdqVOPmWhjC83Nm8DcEW2XYXnO6Nnhx9yVWnPVcXbJCvBoo5l-oj4WDk9zA/exec';
 
+var LIFF_ID = "2009981035-gA1YwASZ";
+var STATUS_MAP = {
+  "待確認": { cls:"chip-pending",  icon:"⏳", label:"待確認" },
+  "已付款": { cls:"chip-paid",     icon:"✅", label:"已付款" },
+  "已出貨": { cls:"chip-shipped",  icon:"🚚", label:"已出貨" },
+  "取消"  : { cls:"chip-canceled", icon:"❌", label:"已取消" },
+};
+var liffProfile = null;
+
 // ── fetch 呼叫 GAS API ──────────────────────────────────────────
 function gasCall(action, params, onSuccess, onError) {
   var qs = 'action=' + action;
@@ -225,407 +234,236 @@ function gasCall(action, params, onSuccess, onError) {
   fetch(API + '?' + qs)
     .then(function(r) { return r.json(); })
     .then(onSuccess)
-    .catch(onError || function(e) { showToast('連線失敗：' + e.message, true); });
+    .catch(onError || function(e) { console.error(e); });
 }
 
-var parsed = [];
-var selIds  = {};
-var curF   = 'all';
-var supF   = 'all';
+// ── LIFF 初始化 ──────────────────────────────────────────────────
+window.addEventListener("load", function() {
+  if (typeof liff === 'undefined') { showLoginScreen(); return; }
+  liff.init({ liffId: LIFF_ID })
+    .then(function() {
+      if (liff.isLoggedIn()) { return liff.getProfile(); }
+      return null;
+    })
+    .then(function(profile) {
+      if (profile) { liffProfile = profile; showLiffProfile(profile); }
+      showLoginScreen();
+    })
+    .catch(function(err) {
+      console.log("LIFF init failed:", err);
+      showLoginScreen();
+    });
+});
 
-var CHIPS = {
-  '待確認': ['cp', '⏳'],
-  '已付款': ['ca', '✅'],
-  '已出貨': ['cs', '🚚'],
-  '取消':   ['cx', '❌']
-};
-
-var SKIP_WORDS = ['圖片','已分享記事本','已收回','貼圖','影片','請問','想問','謝謝','好的','對啊','護照','私訊','記事本','推薦','實拍','分享記事','穿搭影片'];
-
-function shouldSkip(s) {
-  for (var i = 0; i < SKIP_WORDS.length; i++) {
-    if (s.indexOf(SKIP_WORDS[i]) >= 0) return true;
+function showLiffProfile(profile) {
+  var card = document.getElementById("liff-profile-card");
+  card.style.display = "block";
+  document.getElementById("liff-name").textContent = profile.displayName;
+  var avatarEl = document.getElementById("liff-avatar");
+  var placeholderEl = document.getElementById("liff-avatar-placeholder");
+  if (profile.pictureUrl) {
+    avatarEl.src = profile.pictureUrl;
+    avatarEl.style.display = "block";
+    placeholderEl.style.display = "none";
   }
-  return false;
+  document.getElementById("login-input").value = profile.displayName;
+  document.getElementById("manual-divider").style.display = "flex";
 }
 
-function getOrdersFromLine(line) {
-  var out = [];
-  var rePlus = /([A-Za-z]\d+)\s*(.{0,20}?)\s*\+\s*(\d+)/g;
-  var m;
-  while ((m = rePlus.exec(line)) !== null) {
-    var q = parseInt(m[3], 10);
-    if (q >= 1 && q <= 50) {
-      out.push({ code: m[1].toUpperCase(), spec: m[2].trim().replace(/^\/+|\/+$/g, '').trim(), qty: q });
-    }
-  }
-  if (out.length === 0) {
-    var reNoPlus = /([A-Za-z]\d+)\s*([^\d\n]{0,10}?)\s*(\d+)\s*$/g;
-    while ((m = reNoPlus.exec(line)) !== null) {
-      var q = parseInt(m[3], 10);
-      if (q >= 1 && q <= 50) {
-        out.push({ code: m[1].toUpperCase(), spec: m[2].trim(), qty: q });
-      }
-    }
-  }
-  return out;
-}
-
-function parseAll(text) {
-  var out   = [];
-  var lines = text.split('\n');
-  var nick  = '未知';
-  for (var i = 0; i < lines.length; i++) {
-    var raw = lines[i].trim();
-    if (!raw) continue;
-    if (shouldSkip(raw)) continue;
-    var line = raw;
-    var ts = raw.match(/^(\d{1,2}:\d{2})\s+(.+)$/);
-    if (ts) {
-      var rest = ts[2].trim();
-      var pm   = rest.match(/[A-Za-z]\d+/);
-      if (pm) {
-        var pi = rest.indexOf(pm[0]);
-        var np = rest.substring(0, pi).trim().replace(/[:\uff1a\s]+$/, '').trim();
-        if (np) nick = np;
-        line = rest.substring(pi);
-      } else {
-        if (!shouldSkip(rest) && rest.length < 40) nick = rest;
-        continue;
-      }
-    } else {
-      var cm = raw.match(/^([^\uff1a:>+A-Za-z\d]{1,25})[\uff1a:>]\s*(.+)$/);
-      if (cm) {
-        nick = cm[1].trim();
-        line = cm[2].trim();
-      } else if (!raw.match(/[A-Za-z]\d+/) && raw.length < 40 && !shouldSkip(raw)) {
-        nick = raw;
-        continue;
-      }
-    }
-    var found = getOrdersFromLine(line);
-    for (var j = 0; j < found.length; j++) {
-      out.push({ nickname: nick, productCode: found[j].code, spec: found[j].spec, qty: found[j].qty });
-    }
-  }
-  return out;
-}
-
-function onInput() {
-  var val = document.getElementById('txt').value;
-  var det = document.getElementById('det');
-  var btn = document.getElementById('parse-btn');
-  if (!val.trim()) { det.textContent = ''; btn.disabled = true; return; }
-  var tmp = parseAll(val);
-  if (tmp.length > 0) {
-    det.textContent = '✓ 偵測到 ' + tmp.length + ' 筆下單格式';
-    det.style.color = '#1A6B40';
-    det.style.fontWeight = '500';
-    btn.disabled = false;
-  } else {
-    det.textContent = '⚠ 未偵測到符合格式的訂單（格式需含商品編號）';
-    det.style.color = '#92661A';
-    det.style.fontWeight = '400';
-    btn.disabled = true;
-  }
-}
-
-function doParse() {
-  var val = document.getElementById('txt').value.trim();
-  if (!val) return;
-  setL('parse', true);
-  parsed = parseAll(val);
+function showLoginScreen() {
+  document.getElementById("init-loading").style.transition = "opacity 0.4s ease";
+  document.getElementById("init-loading").style.opacity = "0";
   setTimeout(function() {
-    setL('parse', false);
-    if (!parsed.length) {
-      alert('未偵測到符合格式的訂單\n\n格式範例：\n小美：E25米杏+1\n20:41 natalie E25米杏XL+1');
-      return;
+    document.getElementById("init-loading").style.display = "none";
+    var s1 = document.getElementById("screen-login");
+    s1.style.transition = "opacity 0.5s ease";
+    s1.style.opacity = "1";
+  }, 380);
+}
+
+// ── LIFF 一鍵查詢 ────────────────────────────────────────────────
+function handleLiffLogin() {
+  if (!liffProfile) return;
+  setLiffLoading(true);
+  queryOrders(liffProfile.displayName, liffProfile.pictureUrl);
+}
+
+// ── 手動查詢 ────────────────────────────────────────────────────
+function handleManualLogin() {
+  var nickname = document.getElementById("login-input").value.trim();
+  if (!nickname) { shakeInput(); return; }
+  document.getElementById("login-error").style.display = "none";
+  setManualLoading(true);
+  queryOrders(nickname, null);
+}
+
+// ── 共用查詢邏輯 ────────────────────────────────────────────────
+function queryOrders(nickname, avatarUrl) {
+  gasCall('query', { nickname: nickname },
+    function(result) {
+      setLiffLoading(false);
+      setManualLoading(false);
+      if (!result.success) {
+        document.getElementById("login-error").textContent = result.message || '查詢失敗';
+        document.getElementById("login-error").style.display = "block";
+        return;
+      }
+      showOrders(nickname, avatarUrl, result.orders);
+    },
+    function(err) {
+      setLiffLoading(false);
+      setManualLoading(false);
+      document.getElementById("login-error").textContent = "查詢失敗，請稍後再試";
+      document.getElementById("login-error").style.display = "block";
     }
-    showPreview(parsed);
-  }, 200);
+  );
 }
 
-function showPreview(orders) {
-  document.getElementById('pane-paste').style.display = 'none';
-  document.getElementById('pane-preview').style.display = 'block';
-  setStep(2);
-  var ppl = new Set(orders.map(function(o) { return o.nickname; })).size;
-  document.getElementById('psub').textContent = '共 ' + orders.length + ' 筆訂單·' + ppl + ' 位顧客';
-  document.getElementById('pstat').textContent = orders.length + ' 筆·' + ppl + ' 位顧客';
-  var rows = '';
-  for (var i = 0; i < orders.length; i++) {
-    var o = orders[i];
-    rows += '<tr>' +
-      '<td><input type="text" value="' + esc(o.nickname) + '" data-idx="' + i + '" onchange="parsed[this.getAttribute(\'data-idx\')].nickname=this.value" style="background:transparent;border:none;border-bottom:1px solid #E8E2D9;font-size:13px;width:130px;outline:none;padding-bottom:2px;color:#1A1713;"/></td>' +
-      '<td><b style="font-family:monospace;font-size:12px;">' + esc(o.productCode) + '</b></td>' +
-      '<td style="color:#8C8279;font-size:12px;">' + esc(o.spec || '—') + '</td>' +
-      '<td style="text-align:center;">' + o.qty + '</td>' +
-      '<td><button data-idx="' + i + '" onclick="rmRow(parseInt(this.getAttribute(\'data-idx\')))" style="background:none;border:none;cursor:pointer;color:#C8BFB3;font-size:14px;" onmouseover="this.style.color=\'#C0392B\'" onmouseout="this.style.color=\'#C8BFB3\'">✕</button></td>' +
-      '</tr>';
+// ── 訂單畫面 ────────────────────────────────────────────────────
+function showOrders(nickname, avatarUrl, orders) {
+  var s1 = document.getElementById("screen-login");
+  s1.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+  s1.style.opacity = "0"; s1.style.transform = "translateY(-10px)";
+  setTimeout(function() {
+    s1.style.display = "none";
+    var s2 = document.getElementById("screen-orders");
+    s2.style.opacity = "0"; s2.style.transform = "translateY(12px)";
+    s2.style.display = "flex";
+    setTimeout(function() {
+      s2.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+      s2.style.opacity = "1"; s2.style.transform = "translateY(0)";
+    }, 20);
+  }, 280);
+
+  document.getElementById("orders-greeting").textContent = nickname;
+  showActionSection(nickname);
+
+  if (avatarUrl) {
+    var av = document.getElementById("orders-avatar");
+    av.src = avatarUrl; av.style.display = "block";
   }
-  document.getElementById('pbody').innerHTML = rows;
-}
 
-function rmRow(idx) {
-  parsed.splice(idx, 1);
-  if (!parsed.length) { doBack(); return; }
-  showPreview(parsed);
-}
+  document.getElementById("orders-skeleton").style.display = "none";
 
-function doImport() {
-  if (!parsed.length) return;
-  setL('imp', true);
-  gasCall('import', { orders: parsed }, function(r) {
-    setL('imp', false);
-    if (r.success) {
-      document.getElementById('pane-preview').style.display = 'none';
-      document.getElementById('pane-success').style.display = 'block';
-      document.getElementById('smsg').textContent = '成功匯入 ' + r.count + ' 筆訂單至 Google Sheets';
-      setStep(3);
-    } else { showToast('匯入失敗：' + r.message, true); }
-  }, function(e) { setL('imp', false); showToast('匯入失敗：' + e.message, true); });
-}
-
-function doBack()  { document.getElementById('pane-preview').style.display='none'; document.getElementById('pane-paste').style.display='block'; setStep(1); }
-function doReset() {
-  parsed = [];
-  document.getElementById('pane-success').style.display='none';
-  document.getElementById('pane-paste').style.display='block';
-  document.getElementById('txt').value='';
-  document.getElementById('det').textContent='';
-  document.getElementById('parse-btn').disabled=true;
-  setStep(1);
-}
-function doClear() { document.getElementById('txt').value=''; document.getElementById('det').textContent=''; document.getElementById('parse-btn').disabled=true; }
-
-function setL(w, on) {
-  var btn = document.getElementById(w==='parse'?'parse-btn':'imp-btn');
-  var lbl = document.getElementById(w==='parse'?'pl':'il');
-  var sp  = document.getElementById(w==='parse'?'ps':'is');
-  if (btn) btn.disabled = on;
-  if (lbl) lbl.style.display = on ? 'none' : 'inline';
-  if (sp)  sp.style.display  = on ? 'inline-block' : 'none';
-}
-
-function setStep(n) {
-  for (var i = 1; i <= 3; i++) {
-    var el = document.getElementById('sd' + i);
-    if (i < n)        { el.style.background='#1A6B40'; el.style.color='#fff'; el.style.border='none'; }
-    else if (i === n) { el.style.background='#1A1713'; el.style.color='#fff'; el.style.border='none'; }
-    else              { el.style.background='#F3F0EB'; el.style.color='#C8BFB3'; el.style.border='1px solid #E8E2D9'; }
-  }
-}
-
-function loadOrders(f) {
-  curF = f;
-  var map = { 'all': 'fa', '待確認': 'fp', '已付款': 'fpa', '已出貨': 'fsh' };
-  Object.keys(map).forEach(function(k) {
-    var el = document.getElementById(map[k]);
-    if (el) el.className = 'pill' + (k === f ? ' on' : '');
-  });
-  document.getElementById('pload').style.display = 'block';
-  document.getElementById('plist').innerHTML = '';
-  document.getElementById('pempty').style.display = 'none';
-  document.getElementById('del-bar').style.display = 'none';
-  gasCall('allOrders', { status: f }, function(r) {
-    document.getElementById('pload').style.display = 'none';
-    if (!r.success) { showToast('載入失敗', true); return; }
-    renderOrders(r.orders);
-  }, function() { document.getElementById('pload').style.display='none'; showToast('載入失敗', true); });
-}
-
-function renderOrders(orders) {
-  var list  = document.getElementById('plist');
-  var empty = document.getElementById('pempty');
-  if (!orders.length) { empty.style.display = 'block'; return; }
-  var html = '';
-  for (var i = 0; i < orders.length; i++) {
-    var o    = orders[i];
-    var ch   = CHIPS[o.status] || ['cp', '📌'];
-    var paid = o.status === '已付款' || o.status === '已出貨';
-    html += '<div class="card fu" style="padding:18px 20px;">' +
-      '<div style="display:flex;align-items:flex-start;gap:10px;">' +
-      '<input type="checkbox" class="order-cb" data-id="' + esc(o.orderId) + '" onchange="onCbChange(this)" style="margin-top:4px;"/>' +
-      '<div style="flex:1;">' +
-      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;">' +
-        '<div>' +
-          '<p style="font-size:14px;font-weight:500;">' + esc(o.nickname) + '</p>' +
-          '<p style="font-family:monospace;font-size:10px;color:#8C8279;margin-top:3px;">' + esc(o.orderId) + '</p>' +
-          '<p style="font-size:11px;color:#C8BFB3;margin-top:2px;">' + esc(o.timestamp) + '</p>' +
-        '</div>' +
-        '<span class="chip ' + ch[0] + '">' + ch[1] + ' ' + o.status + '</span>' +
-      '</div>' +
-      '<hr class="hr-deco">' +
-      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;">' +
-        '<div>' +
-          '<div style="display:flex;gap:6px;align-items:baseline;">' +
-            '<span style="font-family:monospace;font-size:11px;color:#4A4540;">[' + esc(o.productCode) + ']</span>' +
-            '<span style="font-size:14px;">' + esc(o.productName) + '</span>' +
-          '</div>' +
-          (o.spec ? '<p style="font-size:12px;color:#8C8279;margin-top:3px;">規格：' + esc(o.spec) + '</p>' : '') +
-          '<p style="font-size:12px;color:#4A4540;margin-top:3px;">數量：<strong>' + o.qty + '</strong> 件</p>' +
-        '</div>' +
-        '<div style="text-align:right;">' +
-          (o.subtotal > 0
-            ? '<p style="font-family:Cormorant Garamond,serif;font-style:italic;font-size:20px;font-weight:400;">NT$' + o.subtotal.toLocaleString() + '</p>' +
-              '<p style="font-size:10px;color:' + (paid ? '#1A6B40' : '#92661A') + ';margin-top:2px;">' + (paid ? '✓ 已確認' : '待付款') + '</p>'
-            : '<p style="font-size:11px;color:#C8BFB3;">金額待確認</p>'
-          ) +
-        '</div>' +
-      '</div>' +
-      '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
-    var statuses = ['待確認', '已付款', '已出貨', '取消'];
-    var icons    = ['⏳ ', '✅ ', '🚚 ', '❌ '];
-    for (var j = 0; j < statuses.length; j++) {
-      html += '<button class="st' + (o.status === statuses[j] ? ' on' : '') + '" ' +
-        'onclick="updSt(\'' + escJs(o.orderId) + '\',\'' + statuses[j] + '\')">' +
-        icons[j] + statuses[j] + '</button>';
-    }
-    html += '</div></div></div></div>';
-  }
-  list.innerHTML = html;
-  updateDelBar();
-}
-
-function updSt(id, s) {
-  gasCall('updateStatus', { orderId: id, status: s }, function(r) {
-    if (r.success) { showToast('已更新為「' + s + '」', false); loadOrders(curF); }
-    else showToast('更新失敗：' + r.message, true);
-  });
-}
-
-function setSF(f) {
-  supF = f;
-  var m = { 'all': 'sa', 'paid': 'spa', 'pending': 'spe' };
-  Object.keys(m).forEach(function(k) { document.getElementById(m[k]).className = 'pill' + (k === f ? ' on' : ''); });
-  loadSup();
-}
-
-function loadSup() {
-  document.getElementById('sload').style.display = 'block';
-  document.getElementById('scont').innerHTML = '';
-  document.getElementById('scopy').style.display = 'none';
-  gasCall('summary', { filter: supF }, function(r) {
-    document.getElementById('sload').style.display = 'none';
-    if (!r.success) { showToast('載入失敗', true); return; }
-    renderSup(r);
-  }, function() { document.getElementById('sload').style.display='none'; showToast('載入失敗', true); });
-}
-
-function renderSup(r) {
-  var el  = document.getElementById('scont');
-  var lbl = supF === 'paid' ? '已付款' : supF === 'pending' ? '待確認' : '全部';
-  if (!r.summary.length) {
-    el.innerHTML = '<p style="font-size:13px;color:#C8BFB3;text-align:center;padding:32px 0;">目前沒有訂單資料</p>';
+  if (!orders || !orders.length) {
+    document.getElementById("orders-empty").style.display = "block";
     return;
   }
-  var stats = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">' +
-    '<div class="sbox"><p style="font-family:Cormorant Garamond,serif;font-style:italic;font-size:28px;font-weight:400;">' + r.total + '</p><p style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#8C8279;margin-top:4px;">總件數</p></div>' +
-    '<div class="sbox"><p style="font-family:Cormorant Garamond,serif;font-style:italic;font-size:28px;font-weight:400;">' + r.summary.length + '</p><p style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#8C8279;margin-top:4px;">商品種類</p></div>' +
-    '<div class="sbox"><p style="font-family:Cormorant Garamond,serif;font-style:italic;font-size:28px;font-weight:400;">' + r.orderCount + '</p><p style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#8C8279;margin-top:4px;">' + lbl + ' 訂單</p></div>' +
-    '</div><hr class="hr-deco"><div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">';
-  for (var i = 0; i < r.summary.length; i++) {
-    var item = r.summary[i];
-    stats += '<div style="display:flex;align-items:center;justify-content:space-between;background:#F3F0EB;border-radius:10px;padding:12px 16px;">' +
-      '<div>' +
-        '<div style="display:flex;align-items:baseline;gap:8px;">' +
-          '<span style="font-family:monospace;font-size:13px;color:#4A4540;font-weight:600;">' + esc(item.code) + '</span>' +
-          '<span style="font-size:13px;">' + esc(item.name) + '</span>' +
-        '</div>' +
-        (item.spec ? '<p style="font-size:11px;color:#8C8279;margin-top:3px;">規格：' + esc(item.spec) + '</p>' : '') +
-        '<p style="font-size:11px;color:#C8BFB3;margin-top:2px;">' + item.orders + ' 筆訂單</p>' +
-      '</div>' +
-      '<div style="text-align:right;">' +
-        '<p style="font-family:Cormorant Garamond,serif;font-style:italic;font-size:26px;font-weight:400;">' + item.qty + '</p>' +
-        '<p style="font-size:10px;color:#8C8279;">件</p>' +
-      '</div>' +
-    '</div>';
-  }
-  stats += '</div>';
-  el.innerHTML = stats;
-  var today = new Date().toLocaleDateString('zh-TW');
-  var lines = ['HEYSARAH 下單清單', '日期：' + today + '（' + lbl + '）', ''];
-  for (var j = 0; j < r.summary.length; j++) {
-    var it = r.summary[j];
-    lines.push(it.code + (it.spec ? ' ' + it.spec : '') + '\t× ' + it.qty + ' 件');
-  }
-  lines.push('', '合計：' + r.total + ' 件');
-  document.getElementById('ctxt').textContent = lines.join('\n');
-  document.getElementById('scopy').style.display = 'block';
+
+  var total  = orders.reduce(function(s,o){ return s + o.subtotal; }, 0);
+  var unpaid = orders.filter(function(o){ return o.status === "待確認"; }).length;
+  document.getElementById("stat-count").textContent = orders.length;
+  document.getElementById("stat-total").textContent = "NT$" + total.toLocaleString();
+  var su = document.getElementById("stat-unpaid");
+  su.textContent = unpaid > 0 ? unpaid + " 筆待付款" : "全部已確認 ✓";
+  su.style.color  = unpaid > 0 ? "#92661A" : "#1A6B40";
+  document.getElementById("orders-stats").style.display = "flex";
+
+  var list = document.getElementById("orders-list");
+  list.innerHTML = orders.map(function(o, idx) {
+    var st   = STATUS_MAP[o.status] || { cls:"chip-pending", icon:"📌", label: o.status };
+    var paid = o.status === "已付款" || o.status === "已出貨";
+    var spec = (o.spec && o.spec !== "" && o.spec !== "null")
+      ? "<p style=\"font-size:12px;color:#8C8279;margin-top:4px;font-family:'Noto Sans TC',sans-serif;\">規格：" + esc(o.spec) + "</p>" : "";
+    var note = (o.note && o.note !== "null" && o.note !== "")
+      ? "<p style=\"font-size:11px;color:#C8BFB3;margin-top:10px;padding-top:10px;border-top:1px solid #E8E2D9;font-family:'Noto Sans TC',sans-serif;\">備註：" + esc(o.note) + "</p>" : "";
+    var amt  = o.subtotal > 0
+      ? "<p style=\"font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:#1A1713;font-weight:400;\">NT$" + o.subtotal.toLocaleString() + "</p><p style=\"font-size:10px;margin-top:3px;color:" + (paid?"#1A6B40":"#92661A") + ";font-family:'Noto Sans TC',sans-serif;\">" + (paid?"✓ 已確認":"待付款") + "</p>"
+      : "<p style=\"font-size:11px;color:#C8BFB3;font-family:'Noto Sans TC',sans-serif;\">金額待確認</p>";
+    return "<div class=\"order-card fade-up\" style=\"animation-delay:" + (idx*65) + "ms;\">" +
+      "<div style=\"display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;\">" +
+        "<div><p style=\"font-family:monospace;font-size:10px;color:#8C8279;\">" + esc(o.orderId) + "</p><p style=\"font-family:'Noto Sans TC',sans-serif;font-size:11px;color:#C8BFB3;margin-top:3px;\">" + esc(o.timestamp) + "</p></div>" +
+        "<span class=\"chip " + st.cls + "\">" + st.icon + " " + st.label + "</span>" +
+      "</div>" +
+      "<hr class=\"deco-rule\" style=\"margin-bottom:12px;\">" +
+      "<div style=\"display:flex;align-items:flex-start;justify-content:space-between;gap:12px;\">" +
+        "<div style=\"flex:1;min-width:0;\">" +
+          "<div style=\"display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;\">" +
+            "<span style=\"font-family:monospace;font-size:11px;color:#4A4540;\">[" + esc(o.productCode) + "]</span>" +
+            "<span style=\"font-family:'Noto Sans TC',sans-serif;font-size:14px;color:#1A1713;\">" + esc(o.productName) + "</span>" +
+          "</div>" + spec +
+          "<p style=\"font-family:'Noto Sans TC',sans-serif;font-size:12px;color:#4A4540;margin-top:5px;\">數量：<strong>" + o.qty + "</strong> 件</p>" + note +
+        "</div>" +
+        "<div style=\"text-align:right;flex-shrink:0;\">" + amt + "</div>" +
+      "</div>" +
+    "</div>";
+  }).join("");
 }
 
-function doCopyTxt() {
-  navigator.clipboard.writeText(document.getElementById('ctxt').textContent)
-    .then(function() { showToast('✅ 已複製到剪貼簿', false); })
-    .catch(function() { showToast('請手動選取複製', true); });
+function goBack() {
+  var s2 = document.getElementById("screen-orders");
+  s2.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+  s2.style.opacity = "0"; s2.style.transform = "translateY(-10px)";
+  setTimeout(function() {
+    s2.style.display = "none";
+    s2.style.opacity = ""; s2.style.transform = ""; s2.style.transition = "";
+    document.getElementById("orders-avatar").style.display = "none";
+    var s1 = document.getElementById("screen-login");
+    s1.style.opacity = "0"; s1.style.transform = "translateY(10px)";
+    s1.style.display = "flex";
+    setTimeout(function() {
+      s1.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+      s1.style.opacity = "1"; s1.style.transform = "translateY(0)";
+      setTimeout(function(){ s1.style.transition = ""; }, 400);
+    }, 20);
+    document.getElementById("orders-skeleton").style.display = "block";
+    document.getElementById("orders-stats").style.display = "none";
+    document.getElementById("orders-list").innerHTML = "";
+    document.getElementById("orders-empty").style.display = "none";
+  }, 280);
 }
 
-function onCbChange(cb) {
-  var id = cb.dataset.id;
-  if (cb.checked) selIds[id] = true; else delete selIds[id];
-  updateDelBar();
+function setLiffLoading(on) {
+  var btn = document.getElementById("liff-login-btn");
+  if (btn) btn.disabled = on;
+  var label   = document.getElementById("liff-btn-label");
+  var spinner = document.getElementById("liff-btn-spinner");
+  if (label)   label.style.display   = on ? "none" : "inline";
+  if (spinner) spinner.style.display = on ? "inline-block" : "none";
 }
-function toggleAllCb(checked) {
-  selIds = {};
-  var cbs = document.querySelectorAll('.order-cb');
-  for (var i = 0; i < cbs.length; i++) { cbs[i].checked = checked; if (checked) selIds[cbs[i].dataset.id] = true; }
-  updateDelBar();
+function setManualLoading(on) {
+  document.getElementById("login-btn").disabled = on;
+  document.getElementById("login-label").style.display  = on ? "none" : "inline";
+  document.getElementById("login-spinner").style.display = on ? "inline-block" : "none";
 }
-function updateDelBar() {
-  var n = Object.keys(selIds).length;
-  var bar = document.getElementById('del-bar');
-  if (bar) bar.style.display = 'flex';
-  var dc = document.getElementById('del-count');
-  if (dc) dc.textContent = n > 0 ? (n + ' 筆已選') : '未選取';
-  var db = document.getElementById('del-btn');
-  if (db) db.disabled = (n === 0);
-  var cbAll = document.getElementById('cb-all');
-  if (cbAll) {
-    var total = document.querySelectorAll('.order-cb').length;
-    cbAll.indeterminate = n > 0 && n < total;
-    cbAll.checked = total > 0 && n === total;
-  }
+function shakeInput() {
+  var el = document.getElementById("login-input");
+  el.classList.add("shake");
+  setTimeout(function(){ el.classList.remove("shake"); }, 450);
 }
-function doDeleteSelected() {
-  var ids = Object.keys(selIds);
-  if (!ids.length) return;
-  if (!confirm(ids.length + ' 筆訂單確定刪除？無法復原。')) return;
-  document.getElementById('del-btn').disabled = true;
-  gasCall('deleteOrders', { ids: ids }, function(r) {
-    if (r.success) { showToast('已刪除 ' + r.count + ' 筆', false); selIds = {}; loadOrders(curF); }
-    else { showToast('刪除失敗', true); document.getElementById('del-btn').disabled = false; }
-  }, function() { showToast('刪除失敗', true); document.getElementById('del-btn').disabled = false; });
-}
-
-function switchTab(t) {
-  ['import', 'payment', 'supplier'].forEach(function(n) {
-    document.getElementById('p-' + n).style.display = n === t ? 'block' : 'none';
-    document.getElementById('t-' + n).className = 'tab' + (n === t ? ' on' : '');
-  });
-  if (t === 'payment') loadOrders(curF);
-  if (t === 'supplier') loadSup();
-}
-
-var _tt;
-function showToast(msg, isErr) {
-  var w = document.getElementById('toast');
-  var i = document.getElementById('ti');
-  i.textContent = msg;
-  i.style.background = isErr ? '#FDF0EE' : '#EDFBF3';
-  i.style.color  = isErr ? '#8C2A1A' : '#1A6B40';
-  i.style.border = isErr ? '1px solid #F0C0B8' : '1px solid #A8E6C3';
-  w.style.opacity = '1';
-  clearTimeout(_tt);
-  _tt = setTimeout(function() { w.style.opacity = '0'; }, 2600);
-}
-
 function esc(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  if (!s) return "";
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
-function escJs(s) {
-  if (!s) return '';
-  return String(s).replace(/'/g,"'").replace(/\\/g,'\\\\');
+
+// ── 顧客行動按鈕 ────────────────────────────────────────────────
+var _confirmedNick = '';
+
+function showActionSection(nick) {
+  _confirmedNick = nick;
+  var sec = document.getElementById('action-section');
+  if (sec) sec.style.display = 'block';
+}
+
+function doConfirmOrdered() {
+  if (!_confirmedNick) return;
+  var btn = document.getElementById('btn-confirm');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span>回報中...</span>'; }
+  gasCall('confirmOrdered', { nickname: _confirmedNick },
+    function(r) {
+      if (r && r.success) {
+        var btns = document.getElementById('action-btns-card');
+        var suc  = document.getElementById('confirm-success-card');
+        if (btns) btns.style.display = 'none';
+        if (suc)  suc.style.display  = 'block';
+      } else {
+        if (btn) { btn.disabled = false; btn.innerHTML = '通知我已下單'; }
+      }
+    },
+    function() {
+      if (btn) { btn.disabled = false; btn.innerHTML = '通知我已下單'; }
+    }
+  );
 }
 </script>
 </body>
