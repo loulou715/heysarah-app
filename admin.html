@@ -1,631 +1,350 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HEYSARAH 後台管理</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans TC',sans-serif;background:#f5f5f5;color:#1a1a1a}
-header{background:#1a1a1a;color:#fff;padding:16px 20px;text-align:center}
-header h1{font-size:17px;font-weight:700;letter-spacing:2px}
-header p{font-size:11px;opacity:.4;margin-top:2px}
-.tabs{display:flex;background:#fff;border-bottom:2px solid #e8e8e8;overflow-x:auto}
-.tabs button{flex:1;min-width:70px;padding:13px 6px;font-size:12px;font-weight:500;background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;color:#888;white-space:nowrap;font-family:inherit;transition:all .2s;margin-bottom:-2px}
-.tabs button.active{color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:700}
-.tabs button:hover:not(.active){background:#fafafa}
-.pane{display:none;padding:16px;max-width:1000px;margin:0 auto}
-.pane.active{display:block}
-.card{background:#fff;border-radius:10px;padding:18px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.card h3{font-size:13px;font-weight:700;margin-bottom:10px;color:#444}
-textarea{width:100%;height:160px;border:1.5px solid #e0e0e0;border-radius:8px;padding:11px;font-size:13px;resize:vertical;font-family:inherit;line-height:1.7}
-textarea:focus{outline:none;border-color:#1a1a1a}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .2s}
-.btn-dark{background:#1a1a1a;color:#fff}.btn-dark:hover{background:#333}
-.btn-dark:disabled{background:#ccc;cursor:not-allowed}
-.btn-outline{background:#fff;color:#1a1a1a;border:1.5px solid #1a1a1a}
-.btn-outline:hover{background:#f5f5f5}
-.btn-green{background:#22c55e;color:#fff}.btn-green:disabled{background:#ccc;cursor:not-allowed}
-.btn-sm{padding:5px 11px;font-size:12px;border-radius:6px}
-.badge-ok{display:inline-flex;align-items:center;gap:5px;padding:5px 13px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:20px;font-size:12px;font-weight:700}
-.badge-warn{display:inline-flex;align-items:center;gap:5px;padding:5px 13px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:20px;font-size:12px;font-weight:700}
-.badge-blue{display:inline-flex;align-items:center;gap:5px;padding:5px 13px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:20px;font-size:12px;font-weight:700}
-.hidden{display:none!important}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{text-align:left;padding:9px 11px;background:#f8f8f8;font-weight:700;color:#777;border-bottom:2px solid #ebebeb;white-space:nowrap}
-td{padding:9px 11px;border-bottom:1px solid #f2f2f2;vertical-align:middle}
-tr:hover td{background:#fafafa}
-.tw{overflow-x:auto;border-radius:8px;border:1px solid #ebebeb}
-.sb{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
-.sb.待確認{background:#fef3c7;color:#b45309}
-.sb.已付款{background:#dbeafe;color:#1d4ed8}
-.sb.已出貨{background:#d1fae5;color:#065f46}
-.sb.取消{background:#fee2e2;color:#dc2626}
-.fb{display:flex;gap:7px;flex-wrap:wrap}
-.fb button{padding:6px 13px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #ddd;background:#fff;color:#888;font-family:inherit;transition:all .2s}
-.fb button.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
-.price{font-weight:700}
-.tot{text-align:right;padding:10px 0 0;font-size:13px;font-weight:700}
-.tot span{font-size:19px;color:#b8924a;margin-left:8px}
-.msg-box{text-align:center;padding:36px;color:#bbb;font-size:13px}
-.loading{text-align:center;padding:28px;color:#aaa;font-size:13px}
-select{padding:7px 10px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:12px;font-family:inherit;background:#fff}
-select:focus{outline:none;border-color:#1a1a1a}
-/* 商品目錄 form */
-.pf-grid{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
-.pf{display:flex;flex-direction:column;gap:4px}
-.pf label{font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.5px}
-.pf input{padding:9px 12px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:13px;font-family:inherit;background:#fff}
-.pf input:focus{outline:none;border-color:#1a1a1a}
-.pf input::placeholder{color:#ccc}
-.pf.w80{flex:0 0 80px}.pf.w180{flex:1 1 160px}.pf.w90{flex:0 0 100px}.pf.wauto{flex:1 1 120px}
-/* product detect rows */
-.prod-detect{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#f0f9ff;border-radius:6px;margin-bottom:6px;font-size:12px;flex-wrap:wrap;border:1px solid #bae6fd}
-.pd-code{font-weight:700;font-size:13px;color:#0369a1;min-width:38px}
-.pd-name{flex:1;color:#1a1a1a;font-weight:500}
-.pd-prices{color:#666}
-.pd-sale{font-weight:700;color:#b8924a}
-.pd-tag{font-size:10px;padding:2px 7px;background:#dbeafe;color:#1d4ed8;border-radius:10px;font-weight:700;white-space:nowrap}
-/* product table */
-.be{background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;border-radius:5px;padding:4px 9px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:700}
-.be:hover{background:#e0f2fe}
-.bd{background:#fff0f0;color:#dc2626;border:1px solid #fecaca;border-radius:5px;padding:4px 9px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:700}
-.bd:hover{background:#fee2e2}
-.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:11px 22px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
-.toast.show{opacity:1}
-</style>
-</head>
-<body>
-<div class="toast" id="toast"></div>
-<header>
-  <h1>⚙️ HEYSARAH 後台管理</h1>
-  <p>GROUP BUY ERP SYSTEM</p>
-</header>
-<div class="tabs">
-  <button class="active" id="tbtn-import" onclick="showTab('import')">📥 批次匯入</button>
-  <button id="tbtn-payment" onclick="showTab('payment')">💳 付款管理</button>
-  <button id="tbtn-supplier" onclick="showTab('supplier')">📦 叫貨彙整</button>
-  <button id="tbtn-products" onclick="showTab('products')">📋 商品目錄</button>
-</div>
+// ── 設定 ──────────────────────────────────────────────────────────────
+var CONFIG = {
+  SPREADSHEET_ID: '1Q_FI5qiQkZKM3gx8PliUmkDDQjQz41dD8VbXckF_RVI',
+  SHEET_ORDERS:   '訂單',
+  SHEET_PRODUCTS: '商品',
+  SHEET_MEMBERS:  '會員'
+};
 
-<!-- ═══ 批次匯入 ═══ -->
-<div class="pane active" id="pane-import">
-  <div class="card">
-    <h3>貼上 LINE 群組訊息</h3>
-    <div style="font-size:11px;color:#aaa;margin-bottom:8px">商品介紹貼文＋訂單留言一起貼，系統自動分辨兩者</div>
-    <textarea id="lineInput" placeholder="將 LINE 群組所有訊息貼在這裡&#10;&#10;系統會自動：&#10;• 從含「連線優惠」的貼文提取商品代號、名稱、價格&#10;• 解析訂單留言（格式：暱稱 E20奶茶+1）"></textarea>
-    <div style="margin-top:12px;display:flex;align-items:center;flex-wrap:wrap;gap:10px">
-      <button class="btn btn-outline" onclick="doParse()">🔍 解析</button>
-      <span id="detectBadge" class="hidden"></span>
-      <span id="prodBadge" class="hidden"></span>
-    </div>
-  </div>
+// ── doGet ──────────────────────────────────────────────────────────────
+function doGet(e) {
+  var p = e.parameter || {};
+  var action = p.action || '';
+  var result;
 
-  <div class="card hidden" id="prodDetectCard">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-      <h3 style="margin:0">🔍 自動偵測到商品資訊</h3>
-      <span style="font-size:11px;color:#0369a1">匯入時自動存入商品目錄</span>
-    </div>
-    <div id="prodDetectBody"></div>
-  </div>
+  try {
+    if (action === 'allOrders') {
+      result = getAllOrders(p.status || 'all');
 
-  <div class="card hidden" id="previewCard">
-    <h3>訂單預覽</h3>
-    <div class="tw">
-      <table>
-        <thead><tr><th>#</th><th>暱稱</th><th>商品代號</th><th>商品名稱</th><th>規格</th><th>數量</th><th>單價</th><th>小計</th></tr></thead>
-        <tbody id="previewBody"></tbody>
-      </table>
-    </div>
-    <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-      <div class="tot">合計：<span id="previewTotal">—</span></div>
-      <button class="btn btn-green" id="importBtn" onclick="doImport()" disabled>✓ 確認匯入</button>
-    </div>
-  </div>
-</div>
+    } else if (action === 'getProducts' || action === 'getProductsAdmin') {
+      result = getProductsAdmin();
 
-<!-- ═══ 付款管理 ═══ -->
-<div class="pane" id="pane-payment">
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-      <div class="fb">
-        <button class="active" onclick="filterPay('all',this)">全部</button>
-        <button onclick="filterPay('待確認',this)">待確認</button>
-        <button onclick="filterPay('已付款',this)">已付款</button>
-        <button onclick="filterPay('已出貨',this)">已出貨</button>
-        <button onclick="filterPay('取消',this)">取消</button>
-      </div>
-      <button class="btn btn-outline btn-sm" onclick="loadPayment()">↺ 刷新</button>
-    </div>
-    <div id="paymentTable"><div class="msg-box">請點擊刷新載入訂單</div></div>
-  </div>
-</div>
+    } else if (action === 'saveProduct') {
+      result = saveProduct(JSON.parse(p.product || '{}'));
 
-<!-- ═══ 叫貨彙整 ═══ -->
-<div class="pane" id="pane-supplier">
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:12px;color:#999">篩選狀態</span>
-        <select id="supFilter">
-          <option value="all">全部</option>
-          <option value="待確認">待確認</option>
-          <option value="已付款">已付款</option>
-          <option value="已出貨">已出貨</option>
-        </select>
-      </div>
-      <button class="btn btn-outline btn-sm" onclick="loadSupplier()">↺ 刷新</button>
-    </div>
-    <div id="supplierTable"><div class="msg-box">請點擊刷新載入彙整</div></div>
-    <div class="tot hidden" id="supTotal"></div>
-  </div>
-</div>
-
-<!-- ═══ 商品目錄 ═══ -->
-<div class="pane" id="pane-products">
-  <div class="card">
-    <h3 id="prodFormTitle">➕ 新增商品</h3>
-    <div class="pf-grid">
-      <div class="pf w80">
-        <label>商品代號 *</label>
-        <input id="pCode" placeholder="E20" autocomplete="off">
-      </div>
-      <div class="pf w180">
-        <label>商品名稱 *</label>
-        <input id="pName" placeholder="V領荷葉套裝" autocomplete="off">
-      </div>
-      <div class="pf w90">
-        <label>定價</label>
-        <input id="pPrice" type="number" placeholder="680" min="0">
-      </div>
-      <div class="pf w90">
-        <label>連線優惠價</label>
-        <input id="pSale" type="number" placeholder="628" min="0">
-      </div>
-      <div class="pf wauto">
-        <label>備註</label>
-        <input id="pNote" placeholder="選填" autocomplete="off">
-      </div>
-      <div class="pf" style="justify-content:flex-end">
-        <label>&nbsp;</label>
-        <div style="display:flex;gap:7px">
-          <button class="btn btn-dark btn-sm" onclick="doSaveProduct()">💾 儲存</button>
-          <button class="btn btn-outline btn-sm" onclick="clearProdForm()">✕ 清除</button>
-        </div>
-      </div>
-    </div>
-    <div id="prodFormMsg" style="font-size:12px;min-height:18px;color:#dc2626"></div>
-  </div>
-
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <h3>商品列表</h3>
-      <button class="btn btn-outline btn-sm" onclick="loadProducts()">↺ 刷新</button>
-    </div>
-    <div id="productsTable"><div class="loading">載入中...</div></div>
-  </div>
-</div>
-
-<script>
-var GAS = 'https://script.google.com/macros/s/AKfycbxAampl5u_AKoSlrpP7b3nXiVu-L9ZmmKslS-Qaa-ya_G0UwkUQCIdU8xUKMipu1-hCHw/exec';
-var parsed = [], detectedProds = [], productCache = {}, payStatus = 'all';
-
-document.addEventListener('DOMContentLoaded', function() {
-  gasCall('getProducts', {}, function(d) {
-    (d.products || []).forEach(function(p) { productCache[p.code] = p; });
-  });
-  loadProducts();
-});
-
-// ── Tab ────────────────────────────────────────────────────────────
-function showTab(name) {
-  document.querySelectorAll('.pane').forEach(function(e) { e.classList.remove('active'); });
-  document.querySelectorAll('.tabs button').forEach(function(e) { e.classList.remove('active'); });
-  document.getElementById('pane-' + name).classList.add('active');
-  document.getElementById('tbtn-' + name).classList.add('active');
-  if (name === 'products') loadProducts();
-}
-
-// ── API ────────────────────────────────────────────────────────────
-function gasCall(action, params, ok, fail) {
-  var url = GAS + '?action=' + action;
-  for (var k in params) {
-    var v = params[k];
-    url += '&' + k + '=' + encodeURIComponent(typeof v === 'object' ? JSON.stringify(v) : v);
-  }
-  fetch(url)
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      if (d.success === false) { (fail || function(m) { toast('❌ ' + m, 1); })(d.message); }
-      else ok(d);
-    })
-    .catch(function(e) { (fail || function(m) { toast('❌ ' + m, 1); })('網路錯誤: ' + e.message); });
-}
-
-function toast(msg, err) {
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.background = err ? '#dc2626' : '#1a1a1a';
-  t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, 3000);
-}
-function fmt(n) { return n > 0 ? '$' + Number(n).toLocaleString() : '—'; }
-function sbadge(s) { return '<span class="sb ' + s + '">' + s + '</span>'; }
-
-// ── 全形轉半形 ─────────────────────────────────────────────────────
-function normalize(s) {
-  return s
-    .replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); })
-    .replace(/[＋]/g, '+')
-    .replace(/[　]/g, ' ');
-}
-
-// ── 跳過規則 ───────────────────────────────────────────────────────
-function shouldSkip(l) {
-  if (/^\d{4}[.\-\/]\d{1,2}[.\-\/]\d{1,2}/.test(l)) return true;
-  if (/^\d{1,2}月\d{1,2}日/.test(l)) return true;
-  if (/已收回訊息|傳送貼圖|傳送照片|加入群組|離開群組/.test(l)) return true;
-  if (/^(sarah|heysarah|管理員|小編)/i.test(l)) return true;
-  if (/^EX[:：]/i.test(l)) return true;
-  return false;
-}
-
-// ── 解析訂單 ───────────────────────────────────────────────────────
-function parseOrders(text) {
-  var lines = normalize(text).split('\n'), results = [], lastNick = '';
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i].trim();
-    if (!line || shouldSkip(line)) continue;
-    var nick = '', orderPart = line;
-    var pm = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s+(\S+)\s+(.*)/);
-    if (pm) { nick = pm[2]; orderPart = pm[3]; lastNick = nick; }
-    else {
-      if (!/[A-Za-z]\d{2}/.test(line)) {
-        if (line.length <= 20 && line.indexOf('http') === -1) lastNick = line;
-        continue;
+    } else if (action === 'saveProducts') {
+      var plist = JSON.parse(p.products || '[]');
+      var saved = 0;
+      for (var k = 0; k < plist.length; k++) {
+        var sr = saveProduct(plist[k]);
+        if (sr.success) saved++;
       }
-      nick = lastNick;
+      result = { success: true, saved: saved };
+
+    } else if (action === 'deleteProduct') {
+      result = deleteProduct(p.code || '');
+
+    } else if (action === 'import' || action === 'batchImport') {
+      result = batchImportOrders(JSON.parse(p.orders || '[]'));
+
+    } else if (action === 'query' || action === 'queryOrders') {
+      result = queryOrdersByNickname(p.nickname || '');
+
+    } else if (action === 'updateStatus') {
+      result = updateOrderStatus(p.orderId || '', p.status || '');
+
+    } else if (action === 'summary') {
+      result = getOrderSummary(p.filter || 'all');
+
+    } else if (action === 'deleteOrders') {
+      result = deleteOrders(JSON.parse(p.orderIds || '[]'));
+
+    } else if (action === 'setup') {
+      setupSheets();
+      result = { success: true, message: 'Setup complete' };
+
+    } else {
+      result = { success: true, message: 'HEYSARAH API v4.1', version: '4.1' };
     }
-    var codeM = orderPart.match(/^([A-Za-z]{1,2}\d{2,3})\s*(.*)/);
-    if (!codeM) continue;
-    var code = codeM[1].toUpperCase(), rest = codeM[2];
-    var pairs = [], re = /([^+\d]*?)\s*\+(\d+)/g, m, lastEnd = 0;
-    while ((m = re.exec(rest)) !== null) {
-      pairs.push({ spec: m[1].trim(), qty: parseInt(m[2]) });
-      lastEnd = m.index + m[0].length;
-    }
-    if (pairs.length > 0) {
-      var leftover = rest.substring(lastEnd).trim();
-      if (leftover && leftover.length <= 6 && leftover.indexOf(' ') === -1 && leftover.indexOf('+') === -1)
-        pairs[pairs.length - 1].spec = (pairs[pairs.length - 1].spec + leftover).trim();
-      pairs.forEach(function(p) {
-        if (p.qty > 0 && p.qty < 100)
-          results.push({ nickname: nick || '未填', productCode: code, spec: p.spec, qty: p.qty });
-      });
-    }
-  }
-  return results;
-}
-
-// ── 自動偵測商品（從「連線優惠」標示反查代號名稱）──────────────────
-function parseProductsFromText(text) {
-  var lines = normalize(text).split('\n');
-  var found = [], seen = {};
-
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i].trim();
-    if (!line) continue;
-
-    // 偵測含「連線優惠」的價格行，格式：$1280/連線優惠...$1080
-    var pm = line.match(/\$\s*(\d{3,5})[^$\n]*連線優惠[^$\n]*\$\s*(\d{3,5})/);
-    if (!pm) continue;
-
-    var price = parseInt(pm[1]);
-    var salePrice = parseInt(pm[2]);
-    if (salePrice >= price) continue; // 優惠價必須低於定價
-
-    // 往前掃最多 15 行，找商品代號 + 名稱
-    for (var j = i - 1; j >= Math.max(0, i - 15); j--) {
-      var prev = lines[j].trim();
-      if (!prev) continue;
-
-      // 移除時間戳記前綴「10:23 Fan♡凡凡 內容」
-      var tm = prev.match(/^\d{1,2}:\d{2}(?::\d{2})?\s+\S+\s+(.*)/);
-      if (tm) prev = tm[1].trim();
-
-      // 移除開頭的 emoji / 符號（保留英文字母和中文）
-      prev = prev.replace(/^[^\w\u4e00-\u9fff]+/, '').trim();
-
-      // 匹配商品代號（英字母+數字）+ 空格 + 名稱
-      var cm = prev.match(/^([A-Za-z]\d{2,3})\s+([^\+\d\$][^\n]{1,})/);
-      if (cm) {
-        var code = cm[1].toUpperCase();
-        var name = cm[2].trim().replace(/\s{2,}/g, ' ').substring(0, 20).trim();
-        if (!seen[code] && name.length >= 2) {
-          seen[code] = true;
-          found.push({ code: code, name: name, price: price, salePrice: salePrice, note: '' });
-        }
-        break;
-      }
-    }
-  }
-  return found;
-}
-
-// ── 解析按鈕 ───────────────────────────────────────────────────────
-function doParse() {
-  var text = document.getElementById('lineInput').value.trim();
-  if (!text) { toast('請貼上 LINE 訊息', 1); return; }
-
-  parsed = parseOrders(text);
-  detectedProds = parseProductsFromText(text);
-
-  // 偵測到的商品也加入 cache，讓預覽可顯示價格
-  detectedProds.forEach(function(p) { productCache[p.code] = p; });
-
-  // 訂單 badge
-  var ob = document.getElementById('detectBadge');
-  ob.classList.remove('hidden');
-  if (parsed.length === 0) {
-    ob.className = 'badge-warn'; ob.textContent = '⚠ 未偵測到訂單';
-  } else {
-    ob.className = 'badge-ok'; ob.textContent = '✓ 偵測到 ' + parsed.length + ' 筆訂單';
+  } catch (err) {
+    result = { success: false, message: err.message };
   }
 
-  // 商品 badge
-  var pb = document.getElementById('prodBadge');
-  if (detectedProds.length > 0) {
-    pb.classList.remove('hidden');
-    pb.className = 'badge-blue';
-    pb.textContent = '📋 自動建檔 ' + detectedProds.length + ' 件商品';
-  } else {
-    pb.classList.add('hidden');
-  }
-
-  renderDetectedProducts();
-  if (parsed.length > 0) renderPreview();
-  else {
-    document.getElementById('previewCard').classList.add('hidden');
-    document.getElementById('importBtn').disabled = true;
-  }
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
-function renderDetectedProducts() {
-  var card = document.getElementById('prodDetectCard');
-  var body = document.getElementById('prodDetectBody');
-  if (detectedProds.length === 0) { card.classList.add('hidden'); return; }
-  var html = '';
-  detectedProds.forEach(function(p) {
-    html += '<div class="prod-detect">' +
-      '<span class="pd-code">' + p.code + '</span>' +
-      '<span class="pd-name">' + p.name + '</span>' +
-      '<span class="pd-prices">定價 ' + fmt(p.price) + ' →</span>' +
-      '<span class="pd-sale">連線優惠 ' + fmt(p.salePrice) + '</span>' +
-      '<span class="pd-tag">自動建檔</span>' +
-      '</div>';
-  });
-  body.innerHTML = html;
-  card.classList.remove('hidden');
-}
+// ── 取得所有訂單（13欄結構）────────────────────────────────────────────
+function getAllOrders(statusFilter) {
+  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CONFIG.SHEET_ORDERS);
+  if (!sheet) return { success: true, orders: [] };
 
-function renderPreview() {
-  var tbody = document.getElementById('previewBody'), total = 0;
-  tbody.innerHTML = '';
-  parsed.forEach(function(o, i) {
-    var p = productCache[o.productCode] || {};
-    var unit = p.salePrice || p.price || 0;
-    var sub = unit * o.qty;
-    total += sub;
-    tbody.innerHTML += '<tr>' +
-      '<td>' + (i + 1) + '</td>' +
-      '<td>' + o.nickname + '</td>' +
-      '<td><strong>' + o.productCode + '</strong></td>' +
-      '<td>' + (p.name || '<span style="color:#ccc">未建立</span>') + '</td>' +
-      '<td>' + (o.spec || '—') + '</td>' +
-      '<td>' + o.qty + '</td>' +
-      '<td>' + (unit > 0 ? fmt(unit) : '<span style="color:#ccc">—</span>') + '</td>' +
-      '<td class="price">' + (sub > 0 ? fmt(sub) : '—') + '</td></tr>';
-  });
-  document.getElementById('previewTotal').textContent = total > 0 ? fmt(total) : '—';
-  document.getElementById('previewCard').classList.remove('hidden');
-  var btn = document.getElementById('importBtn');
-  btn.disabled = false;
-  btn.textContent = '✓ 確認匯入 ' + parsed.length + ' 筆' +
-    (detectedProds.length > 0 ? '（含 ' + detectedProds.length + ' 件商品建檔）' : '');
-}
+  var data = sheet.getDataRange().getValues();
+  var orders = [];
 
-// ── 匯入：先存商品 → 再存訂單 ─────────────────────────────────────
-function doImport() {
-  if (!parsed.length) return;
-  var btn = document.getElementById('importBtn');
-  btn.disabled = true; btn.textContent = '匯入中...';
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    if (!row[0]) continue;
+    var status = String(row[10] || '待確認');
+    if (statusFilter && statusFilter !== 'all' && status !== statusFilter) continue;
 
-  function importOrders() {
-    gasCall('batchImport', { orders: parsed }, function(d) {
-      toast('✓ 成功匯入 ' + (d.imported || d.count || 0) + ' 筆訂單' +
-        (detectedProds.length > 0 ? '，' + detectedProds.length + ' 件商品已建檔' : ''));
-      parsed = []; detectedProds = [];
-      document.getElementById('lineInput').value = '';
-      document.getElementById('detectBadge').classList.add('hidden');
-      document.getElementById('prodBadge').classList.add('hidden');
-      document.getElementById('prodDetectCard').classList.add('hidden');
-      document.getElementById('previewCard').classList.add('hidden');
-      btn.textContent = '✓ 確認匯入'; btn.disabled = true;
-    }, function(msg) {
-      toast('❌ 匯入失敗：' + msg, 1);
-      btn.disabled = false;
-      btn.textContent = '✓ 確認匯入 ' + parsed.length + ' 筆';
+    orders.push({
+      orderId:     String(row[0]),
+      timestamp:   row[1] ? Utilities.formatDate(new Date(row[1]), 'Asia/Taipei', 'yyyy-MM-dd HH:mm:ss') : '',
+      nickname:    String(row[2] || ''),
+      userId:      String(row[3] || ''),
+      productCode: String(row[4] || ''),
+      productName: String(row[5] || ''),
+      spec:        String(row[6] || ''),
+      qty:         Number(row[7]) || 0,
+      unitPrice:   Number(row[8]) || 0,
+      subtotal:    Number(row[9]) || 0,
+      status:      status,
+      note:        String(row[11] || ''),
+      easyStoreId: String(row[12] || '')
     });
   }
 
-  if (detectedProds.length > 0) {
-    gasCall('saveProducts', { products: detectedProds }, function() {
-      detectedProds.forEach(function(p) { productCache[p.code] = p; });
-      importOrders();
-    }, function() {
-      importOrders(); // 商品存失敗仍繼續匯入訂單
+  return { success: true, orders: orders };
+}
+
+// ── 取得商品目錄（含下架，管理員用）─────────────────────────────────────
+function getProductsAdmin() {
+  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CONFIG.SHEET_PRODUCTS);
+  if (!sheet) return { success: true, products: [] };
+
+  var data = sheet.getDataRange().getValues();
+  var products = [];
+
+  for (var i = 1; i < data.length; i++) {
+    if (!data[i][0]) continue;
+    products.push({
+      code:        String(data[i][0]).toUpperCase(),
+      name:        String(data[i][1] || ''),
+      price:       Number(data[i][2]) || 0,
+      image:       String(data[i][3] || ''),
+      status:      String(data[i][4] || '上架'),
+      easyStoreId: String(data[i][5] || ''),
+      stock:       Number(data[i][6]) || 0,
+      salePrice:   Number(data[i][7]) || 0,
+      note:        String(data[i][8] || '')
     });
-  } else {
-    importOrders();
+  }
+
+  return { success: true, products: products };
+}
+
+// ── 商品 Map（供訂單匯入查詢價格用）─────────────────────────────────────
+function getProductMap() {
+  var result = getProductsAdmin();
+  var map = {};
+  if (result.success) {
+    result.products.forEach(function(p) {
+      map[p.code] = p;
+    });
+  }
+  return map;
+}
+
+// ── 儲存單一商品（新增或更新，名稱可選）─────────────────────────────────
+function saveProduct(p) {
+  if (!p.code) return { success: false, message: '缺少商品編號' };
+
+  var code = String(p.code).toUpperCase().trim();
+  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CONFIG.SHEET_PRODUCTS);
+
+  // 若工作表不存在，自動建立並加入標題列
+  if (!sheet) {
+    sheet = ss.insertSheet(CONFIG.SHEET_PRODUCTS);
+    sheet.appendRow(['商品編號','品名','定價','圖片網址','狀態','EasyStoreID','庫存','連線優惠價','備註']);
+  }
+
+  var data = sheet.getDataRange().getValues();
+
+  // 找現有列，有則更新（保留原值若新值未傳入）
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).toUpperCase().trim() === code) {
+      sheet.getRange(i + 1, 1, 1, 9).setValues([[
+        code,
+        p.name        !== undefined ? String(p.name)        : String(data[i][1] || ''),
+        p.price       !== undefined ? Number(p.price)       : Number(data[i][2] || 0),
+        p.image       !== undefined ? String(p.image)       : String(data[i][3] || ''),
+        p.status      !== undefined ? String(p.status)      : String(data[i][4] || '上架'),
+        p.easyStoreId !== undefined ? String(p.easyStoreId) : String(data[i][5] || ''),
+        p.stock       !== undefined ? Number(p.stock)       : Number(data[i][6] || 0),
+        p.salePrice   !== undefined ? Number(p.salePrice)   : Number(data[i][7] || 0),
+        p.note        !== undefined ? String(p.note)        : String(data[i][8] || '')
+      ]]);
+      return { success: true, action: 'updated', code: code };
+    }
+  }
+
+  // 新列
+  sheet.appendRow([
+    code,
+    String(p.name       || ''),
+    Number(p.price      || 0),
+    String(p.image      || ''),
+    String(p.status     || '上架'),
+    String(p.easyStoreId|| ''),
+    Number(p.stock      || 0),
+    Number(p.salePrice  || 0),
+    String(p.note       || '')
+  ]);
+
+  return { success: true, action: 'created', code: code };
+}
+
+// ── 刪除商品 ──────────────────────────────────────────────────────────
+function deleteProduct(code) {
+  if (!code) return { success: false, message: '缺少商品編號' };
+  code = String(code).toUpperCase().trim();
+
+  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CONFIG.SHEET_PRODUCTS);
+  if (!sheet) return { success: false, message: '商品工作表不存在' };
+
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).toUpperCase().trim() === code) {
+      sheet.deleteRow(i + 1);
+      return { success: true, deleted: code };
+    }
+  }
+  return { success: false, message: '找不到商品 ' + code };
+}
+
+// ── 批次匯入訂單 ──────────────────────────────────────────────────────
+function batchImportOrders(orders) {
+  if (!orders || !orders.length) return { success: false, message: '無訂單資料' };
+
+  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CONFIG.SHEET_ORDERS);
+  if (!sheet) {
+    sheet = ss.insertSheet(CONFIG.SHEET_ORDERS);
+    sheet.appendRow(['訂單編號','訂單時間','社群暱稱','LINE userId','商品編號','商品名稱','規格','數量','單價','小計','處理狀態','備註','EasyStore訂單ID']);
+  }
+
+  var productMap = getProductMap();
+  var now = new Date();
+  var dateStr = Utilities.formatDate(now, 'Asia/Taipei', 'yyyyMMdd');
+  var rows = [];
+  var count = 0;
+
+  orders.forEach(function(o) {
+    var code = String(o.productCode || '').toUpperCase().trim();
+    var info = productMap[code];
+    // 優先使用前端傳來的 unitPrice，其次查商品目錄，最後 0
+    var unitPrice = Number(o.unitPrice) || (info ? (info.salePrice || info.price || 0) : 0);
+    var qty = Number(o.qty) || 1;
+    count++;
+    var orderId = 'HS-' + dateStr + '-' + String(Date.now()).slice(-4) + String(count).padStart(2, '0');
+
+    rows.push([
+      orderId,
+      now,
+      String(o.nickname || '後台匯入'),
+      String(o.userId   || ''),
+      code,
+      info ? (info.name || String(o.productName || '')) : String(o.productName || ''),
+      String(o.spec  || ''),
+      qty,
+      unitPrice,
+      unitPrice * qty,
+      '待確認',
+      String(o.note  || ''),
+      ''
+    ]);
+  });
+
+  if (rows.length > 0) {
+    sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, 13).setValues(rows);
+  }
+
+  return { success: true, count: count };
+}
+
+// ── 依暱稱查詢訂單 ────────────────────────────────────────────────────
+function queryOrdersByNickname(nickname) {
+  var result = getAllOrders('all');
+  if (!result.success) return result;
+
+  var filtered = nickname
+    ? result.orders.filter(function(o) { return o.nickname.indexOf(nickname) !== -1; })
+    : result.orders;
+
+  return { success: true, orders: filtered };
+}
+
+// ── 更新訂單狀態 ──────────────────────────────────────────────────────
+function updateOrderStatus(orderId, status) {
+  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CONFIG.SHEET_ORDERS);
+  if (!sheet) return { success: false, message: '訂單表不存在' };
+
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === orderId) {
+      sheet.getRange(i + 1, 11).setValue(status);
+      return { success: true };
+    }
+  }
+  return { success: false, message: '找不到訂單 ' + orderId };
+}
+
+// ── 備貨彙整 ──────────────────────────────────────────────────────────
+function getOrderSummary(filter) {
+  var result = getAllOrders('all');
+  if (!result.success) return result;
+
+  var orders = result.orders.filter(function(o) {
+    if (filter === 'pending') return o.status === '待確認';
+    if (filter === 'paid')    return o.status === '已付款';
+    return o.status !== '取消';
+  });
+
+  var map = {};
+  orders.forEach(function(o) {
+    var key = o.productCode + '||' + (o.spec || '');
+    if (!map[key]) {
+      map[key] = { code: o.productCode, name: o.productName || '', spec: o.spec || '', qty: 0, orders: 0 };
+    }
+    map[key].qty += o.qty;
+    map[key].orders += 1;
+  });
+
+  var summary = Object.keys(map).map(function(k) { return map[k]; }).sort(function(a, b) {
+    return a.code < b.code ? -1 : a.code > b.code ? 1 : 0;
+  });
+
+  var totalQty = summary.reduce(function(s, x) { return s + x.qty; }, 0);
+  return { success: true, summary: summary, total: totalQty, orderCount: orders.length };
+}
+
+// ── 刪除訂單 ──────────────────────────────────────────────────────────
+function deleteOrders(orderIds) {
+  if (!orderIds || !orderIds.length) return { success: false, message: '無訂單ID' };
+
+  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(CONFIG.SHEET_ORDERS);
+  if (!sheet) return { success: false, message: '訂單表不存在' };
+
+  var data = sheet.getDataRange().getValues();
+  var toDelete = [];
+  for (var i = 1; i < data.length; i++) {
+    if (orderIds.indexOf(String(data[i][0])) !== -1) toDelete.push(i + 1);
+  }
+  for (var j = toDelete.length - 1; j >= 0; j--) {
+    sheet.deleteRow(toDelete[j]);
+  }
+  return { success: true, deleted: toDelete.length };
+}
+
+// ── 初始化工作表 ──────────────────────────────────────────────────────
+function setupSheets() {
+  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+
+  if (!ss.getSheetByName(CONFIG.SHEET_ORDERS)) {
+    var os = ss.insertSheet(CONFIG.SHEET_ORDERS);
+    os.appendRow(['訂單編號','訂單時間','社群暱稱','LINE userId','商品編號','商品名稱','規格','數量','單價','小計','處理狀態','備註','EasyStore訂單ID']);
+  }
+
+  if (!ss.getSheetByName(CONFIG.SHEET_PRODUCTS)) {
+    var ps = ss.insertSheet(CONFIG.SHEET_PRODUCTS);
+    ps.appendRow(['商品編號','品名','定價','圖片網址','狀態','EasyStoreID','庫存','連線優惠價','備註']);
   }
 }
-
-// ── 付款管理 ───────────────────────────────────────────────────────
-function filterPay(s, btn) {
-  payStatus = s;
-  document.querySelectorAll('#pane-payment .fb button').forEach(function(b) { b.classList.remove('active'); });
-  btn.classList.add('active'); loadPayment();
-}
-function loadPayment() {
-  document.getElementById('paymentTable').innerHTML = '<div class="loading">載入中...</div>';
-  var p = payStatus === 'all' ? {} : { status: payStatus };
-  gasCall('allOrders', p, function(d) { renderPayTable(d.orders || []); });
-}
-function renderPayTable(orders) {
-  if (!orders.length) { document.getElementById('paymentTable').innerHTML = '<div class="msg-box">暫無訂單</div>'; return; }
-  var html = '<div class="tw"><table><thead><tr><th>訂單編號</th><th>暱稱</th><th>商品代號</th><th>商品名稱</th><th>規格</th><th>數量</th><th>單價</th><th>小計</th><th>狀態</th><th>變更</th></tr></thead><tbody>';
-  orders.forEach(function(o) {
-    html += '<tr>' +
-      '<td style="font-size:10px;color:#bbb">' + o.orderId + '</td>' +
-      '<td><strong>' + o.nickname + '</strong></td>' +
-      '<td>' + o.productCode + '</td>' +
-      '<td>' + o.productName + '</td>' +
-      '<td>' + (o.spec || '—') + '</td>' +
-      '<td>' + o.qty + '</td>' +
-      '<td>' + (o.unitPrice > 0 ? fmt(o.unitPrice) : '—') + '</td>' +
-      '<td class="price">' + (o.subtotal > 0 ? fmt(o.subtotal) : '—') + '</td>' +
-      '<td>' + sbadge(o.status) + '</td>' +
-      '<td><select onchange="chgStatus(\'' + o.orderId + '\',this.value)">' +
-      ['待確認', '已付款', '已出貨', '取消'].map(function(s) {
-        return '<option' + (s === o.status ? ' selected' : '') + '>' + s + '</option>';
-      }).join('') + '</select></td></tr>';
-  });
-  html += '</tbody></table></div>';
-  document.getElementById('paymentTable').innerHTML = html;
-}
-function chgStatus(id, s) {
-  gasCall('updateStatus', { orderId: id, status: s }, function() { toast('✓ 狀態已更新：' + s); });
-}
-
-// ── 叫貨彙整 ───────────────────────────────────────────────────────
-function loadSupplier() {
-  var s = document.getElementById('supFilter').value;
-  document.getElementById('supplierTable').innerHTML = '<div class="loading">載入中...</div>';
-  document.getElementById('supTotal').classList.add('hidden');
-  gasCall('allOrders', s === 'all' ? {} : { status: s }, function(d) { renderSupplier(d.orders || []); });
-}
-function renderSupplier(orders) {
-  if (!orders.length) { document.getElementById('supplierTable').innerHTML = '<div class="msg-box">暫無訂單</div>'; return; }
-  var grp = {}, keys = [];
-  orders.forEach(function(o) {
-    var k = o.productCode + '||' + (o.spec || '');
-    if (!grp[k]) {
-      grp[k] = { code: o.productCode, name: o.productName || o.productCode, spec: o.spec || '', qty: 0, subtotal: 0, unitPrice: o.unitPrice || 0 };
-      keys.push(k);
-    }
-    grp[k].qty += o.qty;
-    grp[k].subtotal += (o.subtotal || 0);
-    if (!grp[k].unitPrice && o.unitPrice) grp[k].unitPrice = o.unitPrice;
-  });
-  keys.sort(function(a, b) { return grp[a].code.localeCompare(grp[b].code); });
-  var totalAmt = 0;
-  var html = '<div class="tw"><table><thead><tr><th>商品代號</th><th>商品名稱</th><th>規格</th><th>總數量</th><th>單價</th><th>總金額</th></tr></thead><tbody>';
-  keys.forEach(function(k) {
-    var g = grp[k];
-    totalAmt += g.subtotal;
-    html += '<tr>' +
-      '<td><strong>' + g.code + '</strong></td>' +
-      '<td>' + g.name + '</td>' +
-      '<td>' + (g.spec || '—') + '</td>' +
-      '<td style="font-size:15px;font-weight:700">' + g.qty + '</td>' +
-      '<td>' + (g.unitPrice > 0 ? fmt(g.unitPrice) : '—') + '</td>' +
-      '<td class="price">' + (g.subtotal > 0 ? fmt(g.subtotal) : '—') + '</td></tr>';
-  });
-  html += '</tbody></table></div>';
-  document.getElementById('supplierTable').innerHTML = html;
-  var tb = document.getElementById('supTotal');
-  tb.innerHTML = '總訂貨金額：<span>' + (totalAmt > 0 ? fmt(totalAmt) : '—') + '</span>';
-  tb.classList.remove('hidden');
-}
-
-// ── 商品目錄 ───────────────────────────────────────────────────────
-function loadProducts() {
-  document.getElementById('productsTable').innerHTML = '<div class="loading">載入中...</div>';
-  gasCall('getProducts', {}, function(d) {
-    productCache = {};
-    (d.products || []).forEach(function(p) { productCache[p.code] = p; });
-    renderProdTable(d.products || []);
-  });
-}
-function renderProdTable(list) {
-  if (!list.length) { document.getElementById('productsTable').innerHTML = '<div class="msg-box">尚未建立商品</div>'; return; }
-  var html = '<div class="tw"><table><thead><tr><th>商品代號</th><th>商品名稱</th><th>定價</th><th>連線優惠價</th><th>備註</th><th>操作</th></tr></thead><tbody>';
-  list.forEach(function(p) {
-    html += '<tr>' +
-      '<td><strong>' + p.code + '</strong></td>' +
-      '<td>' + p.name + '</td>' +
-      '<td>' + (p.price > 0 ? fmt(p.price) : '—') + '</td>' +
-      '<td class="price">' + (p.salePrice > 0 ? fmt(p.salePrice) : '—') + '</td>' +
-      '<td style="color:#bbb">' + (p.note || '—') + '</td>' +
-      '<td><div style="display:flex;gap:5px">' +
-      '<button class="be" onclick="editProd(\'' + p.code + '\')">編輯</button>' +
-      '<button class="bd" onclick="delProd(\'' + p.code + '\')">刪除</button>' +
-      '</div></td></tr>';
-  });
-  html += '</tbody></table></div>';
-  document.getElementById('productsTable').innerHTML = html;
-}
-
-function doSaveProduct() {
-  var code = document.getElementById('pCode').value.trim().toUpperCase();
-  var name = document.getElementById('pName').value.trim();
-  var msg = document.getElementById('prodFormMsg');
-
-  if (!code) { msg.textContent = '⚠ 請在「商品代號」欄位輸入代號（例：E20）'; return; }
-  if (!name) { msg.textContent = '⚠ 請在「商品名稱」欄位輸入名稱'; return; }
-
-  msg.textContent = '儲存中...'; msg.style.color = '#999';
-  var prod = {
-    code: code, name: name,
-    price: Number(document.getElementById('pPrice').value) || 0,
-    salePrice: Number(document.getElementById('pSale').value) || 0,
-    note: document.getElementById('pNote').value.trim()
-  };
-  gasCall('saveProduct', { product: prod }, function(d) {
-    var act = d.action === 'updated' ? '已更新' : '已新增';
-    msg.textContent = '✓ ' + code + ' ' + act;
-    msg.style.color = '#15803d';
-    clearProdForm();
-    loadProducts();
-    toast('✓ 商品 ' + code + ' ' + act);
-  }, function(errMsg) {
-    msg.textContent = '❌ ' + errMsg;
-    msg.style.color = '#dc2626';
-  });
-}
-
-function editProd(code) {
-  var p = productCache[code]; if (!p) return;
-  document.getElementById('pCode').value = p.code;
-  document.getElementById('pName').value = p.name;
-  document.getElementById('pPrice').value = p.price || '';
-  document.getElementById('pSale').value = p.salePrice || '';
-  document.getElementById('pNote').value = p.note || '';
-  document.getElementById('prodFormTitle').textContent = '✏️ 編輯商品：' + code;
-  document.getElementById('prodFormMsg').textContent = '';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-function delProd(code) {
-  if (!confirm('確定刪除商品 ' + code + '？')) return;
-  gasCall('deleteProduct', { code: code }, function() { toast('✓ 已刪除 ' + code); loadProducts(); });
-}
-function clearProdForm() {
-  ['pCode', 'pName', 'pPrice', 'pSale', 'pNote'].forEach(function(id) { document.getElementById(id).value = ''; });
-  document.getElementById('prodFormTitle').textContent = '➕ 新增商品';
-  document.getElementById('prodFormMsg').textContent = '';
-}
-</script>
-</body>
-</html>
