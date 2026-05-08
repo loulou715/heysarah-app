@@ -201,7 +201,7 @@
 
 </div>
 <script>
-const API="https://script.google.com/macros/s/AKfycbyO0fJgsNKj7_xHwkaAfQjjuJQ6woPYGwmDGU1uqpM1L905FnwfoKwhpSYOc1J-Ehyy/exec";
+const API="https://script.google.com/macros/s/AKfycbxHgsqXOEy7WnXU-29B6F-nFqV6GC2lTNhwrAPqTtdhU_WwCD5ydgHqbeOR10hnAY1KlQ/exec";
 let allOrders=[],productCache={},summaryOrders=[];
 
 async function gasCall(action,params={}){
@@ -285,6 +285,15 @@ function normalize(t){
 function parseProductsFromText(text){
   const lines=normalize(text).split("\n");
   const found=[],seen={};
+  // 解析含千分位逗號的價格，如 $1,280 或 $1280
+  function parsePrice(s){return parseInt(String(s).replace(/,/g,""));}
+  // 匹配含逗號或不含逗號的價格
+  const priceRe=/\$\s*([\d,]{3,7})/g;
+  function extractPrices(line){
+    const ps=[];let m;priceRe.lastIndex=0;
+    while((m=priceRe.exec(line))!==null){const v=parsePrice(m[1]);if(v>=100&&v<=99999)ps.push(v);}
+    return ps;
+  }
   function findAbove(idx){
     for(let j=idx;j>=Math.max(0,idx-20);j--){
       let line=lines[j].trim();if(!line)continue;
@@ -298,10 +307,15 @@ function parseProductsFromText(text){
   for(let i=0;i<lines.length;i++){
     const line=lines[i].trim();if(!line)continue;
     let price=0,salePrice=0;
-    const m1=line.match(/\$\s*(\d{3,5})[^\d$\n]*連線優惠[^\d$\n]*\$\s*(\d{3,5})/);
-    if(m1){price=parseInt(m1[1]);salePrice=parseInt(m1[2]);}
-    if(!price){const m2=line.match(/連線優惠\s*\$\s*(\d{3,5})/);if(m2){salePrice=parseInt(m2[1]);const m2p=line.match(/\$\s*(\d{3,5})[^\d]*連線優惠/);if(m2p){price=parseInt(m2p[1]);}else{for(let k=i-1;k>=Math.max(0,i-3);k--){const mk=lines[k].trim().match(/\$\s*(\d{3,5})/);if(mk){price=parseInt(mk[1]);break;}}}}}
-    if(!price){const m3=line.match(/^\s*(?:定價)?\s*\$\s*(\d{3,5})\s*[\/\\]?\s*$/);if(m3){for(let n=i+1;n<=Math.min(i+2,lines.length-1);n++){const m3n=lines[n].trim().match(/連線優惠\s*\$\s*(\d{3,5})/);if(m3n){price=parseInt(m3[1]);salePrice=parseInt(m3n[1]);break;}}}}
+    // m1: 同一行有兩個價格且含「連線優惠」，支援千分位
+    const m1=line.match(/\$\s*([\d,]{3,7})[^\d$\n]*連線優惠[^\d$\n]*\$\s*([\d,]{3,7})/);
+    if(m1){price=parsePrice(m1[1]);salePrice=parsePrice(m1[2]);}
+    // m2: 含「連線優惠 $xxx」，前面或上方找定價
+    if(!price){const m2=line.match(/連線優惠\s*\$\s*([\d,]{3,7})/);if(m2){salePrice=parsePrice(m2[1]);const m2p=line.match(/\$\s*([\d,]{3,7})[^\d]*連線優惠/);if(m2p){price=parsePrice(m2p[1]);}else{for(let k=i-1;k>=Math.max(0,i-3);k--){const mk=lines[k].trim().match(/\$\s*([\d,]{3,7})/);if(mk){price=parsePrice(mk[1]);break;}}}}}
+    // m3: 當前行只有價格，下方 1~2 行有連線優惠
+    if(!price){const m3=line.match(/^\s*(?:定價)?\s*\$\s*([\d,]{3,7})\s*[\/\\]?\s*$/);if(m3){for(let n=i+1;n<=Math.min(i+2,lines.length-1);n++){const m3n=lines[n].trim().match(/連線優惠\s*\$\s*([\d,]{3,7})/);if(m3n){price=parsePrice(m3[1]);salePrice=parsePrice(m3n[1]);break;}}}}
+    // m4: 上方 1~2 行有定價，當前行只有連線優惠
+    if(!price&&!salePrice){const m4=line.match(/^連線優惠\s*\$\s*([\d,]{3,7})/);if(m4){salePrice=parsePrice(m4[1]);for(let k=i-1;k>=Math.max(0,i-3);k--){const mk=lines[k].trim().match(/(?:定價)?\s*\$\s*([\d,]{3,7})/);if(mk){price=parsePrice(mk[1]);break;}}}}
     if(!price||!salePrice||salePrice>=price)continue;
     const prod=findAbove(i-1);
     if(prod&&!seen[prod.code]){seen[prod.code]=true;found.push({code:prod.code,name:prod.name,price,salePrice,note:""});}
@@ -311,17 +325,21 @@ function parseProductsFromText(text){
 
 function parseOrdersFromText(text,defaultNick){
   const lines=normalize(text).split("\n");const orders=[];
-  const lineRe=/^\d{1,2}:\d{2}(?::\d{2})?\s+(\S+)\s+(.*)/;
+  const lineRe=/^\d{1,2}:\d{2}(?::\d{2})?\s+(\S+)\s*(.*)/;
   const orderRe=/([A-Za-z]\d{2,3})\s*([^+\n]*?)\s*\+\s*(\d+)/gi;
+  let lastNick=null; // 追蹤「時間 姓名」單獨一行的情況
   for(const raw of lines){
-    const line=raw.trim();if(!line)continue;
-    const lm=line.match(lineRe);const msg=lm?lm[2].trim():line;const nick=lm?lm[1]:null;
-    if(/連線優惠|\$\d{3,5}/.test(msg))continue;
+    const line=raw.trim();if(!line){lastNick=null;continue;}
+    const lm=line.match(lineRe);
+    const msg=lm?lm[2].trim():line;
+    const nick=lm?lm[1]:null;
+    if(nick)lastNick=nick; // 更新最近看到的姓名
+    if(/連線優惠|\$[\d,]{3,7}/.test(msg))continue;
     if(/^EX:|^例如|^範例|^注意|^說明/.test(msg))continue;
     let om;orderRe.lastIndex=0;
     while((om=orderRe.exec(msg))!==null){
       const code=om[1].toUpperCase();const spec=om[2].trim().replace(/^[\/\-\s]+|[\/\-\s]+$/g,"").trim();
-      const qty=parseInt(om[3]);const nickname=defaultNick||nick||"後台匯入";
+      const qty=parseInt(om[3]);const nickname=defaultNick||nick||lastNick||"後台匯入";
       const info=productCache[code];const unitPrice=info?(info.salePrice||info.price||0):0;
       orders.push({productCode:code,spec,qty,nickname,unitPrice,subtotal:unitPrice*qty});
     }
@@ -352,7 +370,24 @@ async function doImport(){
   if(products.length>0){try{const pr=await gasCall("saveProducts",{products:JSON.stringify(products)});products.forEach(p=>{productCache[p.code]=p;});savedMsg="自動建立 "+(pr.saved||products.length)+" 項商品，";}catch(e){}}
   const orders=parseOrdersFromText(text,nickname);
   if(!orders.length){el.textContent="❌ 未偵測到訂單，請確認格式（如：A01黑L+1）";return;}
-  try{const data=await gasCall("import",{orders:JSON.stringify(orders)});el.innerHTML=data.success?"✅ "+savedMsg+"成功匯入 "+data.count+" 筆訂單":"❌ "+data.message;}
+  // 前台帶入已知價格，讓 GAS 不需再讀商品表
+  orders.forEach(o=>{
+    if(!o.unitPrice){
+      const p=productCache[o.productCode];
+      if(p) o.unitPrice=p.salePrice||p.price||0;
+    }
+  });
+  try{
+    const data=await gasCall("import",{orders:JSON.stringify(orders)});
+    if(data.success){
+      el.innerHTML="✅ "+savedMsg+"成功匯入 "+data.count+" 筆訂單，正在跳至付款管理⋯";
+      setTimeout(()=>{
+        const navEl=document.querySelector('.nav-item[onclick*="payment"]');
+        showPage('payment',navEl);
+        if(navEl){document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));navEl.classList.add('active');}
+      },800);
+    }else{el.innerHTML="❌ "+data.message;}
+  }
   catch(e){el.textContent="❌ 網路錯誤："+e.message;}
 }
 
@@ -402,6 +437,7 @@ async function deleteSingleOrder(orderId,btn){
 }
 
 async function loadPayment(){
+  document.getElementById("tb-payment").innerHTML="<tr><td colspan='9' style='text-align:center;padding:30px;color:#aaa'>載入中⋯</td></tr>";
   const data=await gasCall("allOrders",{status:"all"});if(!data.success)return;
   const pending=data.orders.filter(o=>o.status==="待確認");
   document.getElementById("tb-payment").innerHTML=pending.length===0
@@ -511,3 +547,4 @@ async function doDeleteProduct(code,btn){
 </script>
 </body>
 </html>
+
