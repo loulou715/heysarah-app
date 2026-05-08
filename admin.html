@@ -329,7 +329,7 @@ function parseOrdersFromText(text,defaultNick){
   const orderRe=/([A-Za-z]\d{2,3})\s*([^+\n]*?)\s*\+\s*(\d+)/gi;
   let lastNick=null; // 追蹤「時間 姓名」單獨一行的情況
   for(const raw of lines){
-    const line=raw.trim();if(!line){lastNick=null;continue;}
+    const line=raw.trim();if(!line)continue;
     const lm=line.match(lineRe);
     const msg=lm?lm[2].trim():line;
     const nick=lm?lm[1]:null;
@@ -547,4 +547,5 @@ async function doDeleteProduct(code,btn){
 </script>
 </body>
 </html>
+
 
