@@ -64,7 +64,7 @@
 </head>
 <body>
 <div class="sidebar">
-  <div class="sidebar-logo">HEYSARAH <span>ADMIN v4.3</span></div>
+  <div class="sidebar-logo">HEYSARAH <span>ADMIN v4.2</span></div>
   <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="icon">📊</span>總覽</div>
   <div class="nav-item" onclick="showPage('orders',this)"><span class="icon">📋</span>訂單管理</div>
   <div class="nav-item" onclick="showPage('import',this)"><span class="icon">📥</span>批次匯入</div>
@@ -205,8 +205,8 @@ const API="https://script.google.com/macros/s/AKfycbyO0fJgsNKj7_xHwkaAfQjjuJQ6wo
 let allOrders=[],productCache={},summaryOrders=[];
 
 async function gasCall(action,params={}){
-  const body=new URLSearchParams({action,...params});
-  const res=await fetch(API,{method:'POST',body});
+  const qs=new URLSearchParams({action,...params}).toString();
+  const res=await fetch(API+"?"+qs);
   return res.json();
 }
 
