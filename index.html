@@ -38,7 +38,6 @@ body{font-family:'Noto Sans TC',sans-serif;background:#faf9f7;color:#2c2c2c;min-
 .query-btn:hover{background:#444}
 .query-btn:disabled{background:#ccc;cursor:not-allowed}
 
-/* 收據樣式 */
 .receipt-wrap{margin-top:4px}
 .receipt-card{background:#fff;border-radius:16px;padding:22px;box-shadow:0 4px 24px rgba(0,0,0,.08);margin-bottom:12px}
 .receipt-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
@@ -77,8 +76,6 @@ footer{text-align:center;padding:32px 20px;font-size:11px;color:#ccc;letter-spac
   <div class="logo-wrap">
     <img src="/logo.png" alt="HEYSARAH">
   </div>
-  <div class="brand">HEYSARAH</div>
-  <div class="tagline">SELECT SHOP</div>
 </div>
 
 <div class="section">
@@ -129,10 +126,10 @@ EX: E20奶茶+1藍+2</span></pre>
   </div>
 </div>
 
-<footer>© 2025 HEYSARAH SELECT SHOP<br>All rights reserved.</footer>
+<footer>© 2025 All rights reserved.</footer>
 
 <script>
-var GAS = 'https://script.google.com/macros/s/AKfycbxAampl5u_AKoSlrpP7b3nXiVu-L9ZmmKslS-Qaa-ya_G0UwkUQCIdU8xUKMipu1-hCHw/exec';
+var GAS = 'https://script.google.com/macros/s/AKfycbxHgsqXOEy7WnXU-29B6F-nFqV6GC2lTNhwrAPqTtdhU_WwCD5ydgHqbeOR10hnAY1KlQ/exec';
 
 document.getElementById('nickInput').addEventListener('keydown', function(e){
   if(e.key==='Enter') doQuery();
@@ -168,7 +165,6 @@ function renderResults(orders){
     return;
   }
 
-  // 依日期分組
   var groups={}, gkeys=[];
   orders.forEach(function(o){
     var date=(o.timestamp||'').split(' ')[0]||'未知日期';
@@ -181,7 +177,6 @@ function renderResults(orders){
   var html='<div class="receipt-wrap">';
   gkeys.forEach(function(key){
     var g=groups[key];
-    // 合併同代號+規格
     var merged={}, mkeys=[];
     g.items.forEach(function(o){
       var mk=o.productCode+'_'+(o.spec||'');
